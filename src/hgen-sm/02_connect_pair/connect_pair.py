@@ -1,9 +1,3 @@
-import time
-start_time = time.time()
-
-import pyvista as pv
-import yaml
-
 from config.user_input import rect0, rect1
 from .design_exploration.state import State
 from .design_exploration.connect_edges import one_bend, two_bends
@@ -12,13 +6,7 @@ from .design_exploration.plot_state import plot_state
 from .geometry.utilities import convert_to_float64
 from .geometry.part_generation import determine_fourth_points, calculate_planes, calculate_intersections, collision_tab_bend
 
-with open("config/config.yaml") as f:
-    cfg = yaml.load(f, Loader=yaml.FullLoader)
-
-import matplotlib
-matplotlib.use("Agg")
-
-def main():
+def connect_pair():
     # ------ Initialization ------
     plot_cfg = cfg.get('plot', {})
     plotter = pv.Plotter()
@@ -44,6 +32,3 @@ def main():
     # ------ Plotting solutions ------
     if len(solutions)<=1: return
     plot_state(plotter, plot_cfg, solutions)
-
-if __name__ == '__main__':
-    main()
