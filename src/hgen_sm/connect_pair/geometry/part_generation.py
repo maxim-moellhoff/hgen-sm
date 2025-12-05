@@ -4,38 +4,7 @@ import pyvista as pv
 from types import SimpleNamespace
 from gen_design_sheet_metal.geometry.utilities import normalize, closest_points_between_lines, perp_toward_plane
 
-def determine_fourth_points(rectangles):
-    """
-    Given three points (A, B, C), compute fourth point D and reorder the points
-    in circular order (A, B, D, C) so the rectangle is not twisted.
-    """
-    for rect in rectangles:
-        A, B, C = rect["pointA"], rect["pointB"], rect["pointC"]
-        
-        # Compute vectors
-        AB = B - A
-        AC = C - A
 
-        # Compute normal (for consistent orientation)
-        normal = np.cross(AB, AC)
-
-        # If AB and AC are swapped (zigzag), flip AC to keep CCW order
-        if np.dot(np.cross(AB, AC), normal) < 0:
-            # Swap B and C if needed
-            B, C = C, B
-            AB = B - A
-            AC = C - A
-
-        # Compute D in the proper rectangular order
-        D = A + AB + AC
-
-        # Overwrite in consistent circular order (A, B, D, C)
-        rect["pointA"] = A
-        rect["pointB"] = B
-        rect["pointC"] = D
-        rect["pointD"] = C
-
-    return rectangles
 
 def calculate_planes(rectangles):
     """

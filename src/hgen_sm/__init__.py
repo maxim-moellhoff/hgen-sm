@@ -8,5 +8,6 @@ from .classes import Part, Tab, Pair, Bend
 
 # Define what is available when the package is imported
 __all__ = [
+    ""
     "__version__"
 ]

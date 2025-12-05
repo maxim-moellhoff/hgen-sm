@@ -9,9 +9,10 @@ from config.user_input import rect0, rect1, rect2
 import itertools
 from .classes import State
 
-from .01_topology import determine_topology
-from .02_connect_pair import connect_pair
-from .03_assemble import assemble
+from src.hgen_sm.classes import Rectangle, Tab
+from src.hgen_sm.topology.choose_pairs import connect_pairs
+from src.hgen_sm.connect_pair import connect_pair
+from src.hgen_sm.assemble import assemble
 
 with open("config/config.yaml") as f:
     cfg = yaml.load(f, Loader=yaml.FullLoader)
