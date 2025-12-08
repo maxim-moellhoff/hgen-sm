@@ -8,6 +8,5 @@ from .choose_pairs import determine_topology
 # Define what is available when the package is imported
 __all__ = [
     "__version__"
-    "choose_pairs"
     "determine_topology"
 ]

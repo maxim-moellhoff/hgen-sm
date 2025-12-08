@@ -1,3 +1,7 @@
+topologies:
+  simple_topology: true
+
+
 design_exploration:
   single_bend: True
   double_bend : True

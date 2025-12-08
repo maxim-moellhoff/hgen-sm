@@ -4,18 +4,18 @@ start_time = time.time()
 import pyvista as pv
 import yaml
 
-from config.user_input import rect0, rect1, rect2
+from config.user_input import RECTANGLE_INPUTS
+import config.design_rules
+with open("config/config.yaml") as f:
+    cfg = yaml.load(f, Loader=yaml.FullLoader)
 
 import itertools
 
-from src.hgen_sm.classes import Part, Pair, Rectangle, Tab
-from src.hgen_sm.determine_topology import choose_pairs
-from src.hgen_sm.find_connections import connect_pair
+from hgen_sm.data.classes import Part, Pair, Rectangle, Tab
+from src.hgen_sm.determine_topology import determine_topology
+from src.hgen_sm.find_connections import find_connections 
 from src.hgen_sm.part_assembly import assemble
 from hgen_sm.plotting import plot_assembly
-
-with open("config/config.yaml") as f:
-    cfg = yaml.load(f, Loader=yaml.FullLoader)
 
 # import matplotlib
 # matplotlib.use("Agg")
@@ -26,19 +26,24 @@ def main():
     plotter = pv.Plotter()
 
     # Import user input
-    rectangles = rect0, rect1, rect2
+    rectangle_inputs = RECTANGLE_INPUTS
 
     # Determine sensible Topologies
-    topologies = []
-    topologies.append(choose_pairs(rectangles, cfg))
+    topologies = determine_topology(rectangle_inputs, cfg)
+    print(topologies)
 
     # Find ways to connect pairs
-    part = Part()
+    
     solutions = []
     for topology in topologies:
+        part = Part(rectangles=rectangle_inputs, topology=topology, pairs=topology.get_pairs())
         connections = []
-        for pair in topology:
-            connections.append(connect_pair(part, pair, cfg))
+        for pair in topology.sequence:
+            tab_x = pair.tab_x
+            rect_x = part.get_rect_id(tab_x)
+            tab_z = pair.tab_z
+            rect_z = part.get_rect_id(tab_z)
+            connections.append(find_connections(part, rect_x, rect_z, cfg))
 
     # Call assemble, which creates global parts
         for combination in itertools.product(*connections):
