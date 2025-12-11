@@ -10,7 +10,7 @@ with open("config/config.yaml") as f:
 
 import itertools
 
-from src.hgen_sm.data import *
+from src.hgen_sm.data import Part
 from src.hgen_sm.initialization import initialize_objects
 from src.hgen_sm.determine_sequences import determine_sequences
 from src.hgen_sm.create_segments import create_segments 
@@ -21,8 +21,8 @@ from src.hgen_sm.plotting.plot_assembly import plot_solutions
 # matplotlib.use("Agg")
 
 def main():
-    segment_cfg = cfg.get('design_exploration', {})
-    plot_cfg = cfg.get('plot', {})
+    segment_cfg = cfg.get('design_exploration')
+    plot_cfg = cfg.get('plot')
     plotter = pv.Plotter()
 
     # Import user input

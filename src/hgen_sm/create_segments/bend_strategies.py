@@ -7,17 +7,9 @@ from .utils import check_lines_cross, cord_lines_cross
 
 from ..data.bend import Bend
 
-from hgen_sm.data import *
-
-# def get_point_map(rect):
-#         return {
-#             id(rect.pointA): 'A', id(rect.pointB): 'B', id(rect.pointC): 'C', id(rect.pointD): 'D'
-#         }
+from hgen_sm.data import Part, Tab, Rectangle
 
 def one_bend(segment):
-    # tab_x_id = segment.tab_x_id
-    # tab_z_id = segment.tab_z_id
-
     tab_x = segment.tabs['tab_x']
     tab_x_id = tab_x.tab_id
     tab_z = segment.tabs['tab_z']
@@ -36,43 +28,42 @@ def one_bend(segment):
 
     segment_library = []
     for pair_x in rect_x_combinations:
+        CP_xL_id = pair_x[0]
+        CP_xR_id = pair_x[1]
+        CP_xL = rect_x.corners[CP_xL_id]
+        CP_xR = rect_x.corners[CP_xR_id]
         for pair_z in rect_z_combinations:
+            CP_zL_id = pair_z[0]
+            CP_zR_id = pair_z[1]
+            CP_zL = rect_z.corners[CP_zL_id]
+            CP_zR = rect_z.corners[CP_zR_id]
+
             # ---- Copy ----
             # For each segment the tab can change, and therefore needs to be copied. The rects stay the same in each case
             new_segment = segment.copy()
             new_tab_x = new_segment.tabs['tab_x']
             new_tab_z = new_segment.tabs['tab_z']
 
-            # ---- Assign used Corner Points CP to Segment ----
-            CPxL_id = pair_x[0]
-            CPxR_id = pair_x[1]
-            CPzL_id = pair_z[0]
-            CPzR_id = pair_z[1]
-
-            CPxL = rect_x.corners[CPxL_id]
-            CPxR = rect_x.corners[CPxR_id]
-            CPzL = rect_z.corners[CPzL_id]
-            CPzR = rect_z.corners[CPzR_id]
-            
-            new_tab_x.corner_usage[CPxL_id] = True
-            new_tab_x.corner_usage[CPxR_id] = True
-            new_tab_z.corner_usage[CPzL_id] = True
-            new_tab_z.corner_usage[CPzR_id] = True
+            # ---- Assign used Corner Points CP to Segment ----            
+            new_tab_x.corner_usage[CP_xL_id] = True
+            new_tab_x.corner_usage[CP_xR_id] = True
+            new_tab_z.corner_usage[CP_zL_id] = True
+            new_tab_z.corner_usage[CP_zR_id] = True
             
             # ---- Bends ----
             new_bend = bend.copy()
 
-            BPL = create_bending_point(CPxL, CPzL, bend)
-            BPR = create_bending_point(CPxR, CPzR, bend)
+            BPL = create_bending_point(CP_xL, CP_zL, bend)
+            BPR = create_bending_point(CP_xR, CP_zR, bend)
 
             new_bend.BPL, new_bend.BPR = BPL, BPR
 
             new_bend.FPL_A, new_bend.FPL_B, new_bend.FPR_A, new_bend.FPR_B = (
                  calculate_flange_points(BPL, BPR, planeA=plane_x, planeB=plane_z)
             )
-            new_tab_x.bends = {tab_x_id+tab_z_id: bend}
-            new_tab_z.bends = {tab_x_id+tab_z_id: bend}
-            new_segment.bends.update({tab_x_id+tab_z_id: bend})
+            new_segment.bends.update({tab_x_id+tab_z_id: new_bend})
+            # new_tab_x.bends = {tab_x_id+tab_z_id: new_bend}
+            # new_tab_z.bends = {tab_x_id+tab_z_id: new_bend}
             
             # inter = None
             # if check_lines_cross(CP, FP, BP): 

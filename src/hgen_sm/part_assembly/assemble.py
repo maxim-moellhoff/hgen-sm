@@ -7,6 +7,7 @@ def part_assembly(part, segments_combination, cfg):
     #     segment.tabs[tab_x_id]
 
     segments_combination
+    
     part.bends.update(segments_combination[0].bends)
     part.tabs[segments_combination[0].tab_x_id] = segments_combination[0].tabs[0]
 

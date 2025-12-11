@@ -21,6 +21,10 @@ class Tab:
         # Tab Side R: FP1, BP1, CP, CP(, BP2, FP2)
         self.points_R = []
 
+        # Tab Usage Encoding:
+        # A FBBF B FBBF C FBBF D FBBF
+        # CP FP_L BP_L BP_R FP_R ... 
+
     def __repr__(self):
         # 1. Start the representation string
         repr_str = f"<Tab: ID={self.tab_id}"
