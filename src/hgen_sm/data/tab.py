@@ -18,30 +18,56 @@ class Tab:
             'D': rectangle.corners['D']
         }
         self.mounts = []
-        self.corner_usage: Dict[str, Optional[str]] = {'A': None, 'B': None, 'C': None, 'D': None}
-
+        self.bends: list['Bend'] = []
+        # self.corner_usage: Dict[str, Optional[str]] = {'A': None, 'B': None, 'C': None, 'D': None}
 
     def __repr__(self):
-        # 1. Start the representation string
-        repr_str = f"<Tab: ID={self.tab_id}"
-        
-        # 2. Check and append points count
-        if self.points:
-            repr_str += f", Points={len(self.points)}"
-        
-        # 3. Check and append occupied corner points (CP) count
-        if self.occ_CP:
-            repr_str += f", Used CPs={len(self.occ_CP)}"
-        
-        # 4. Check and append mounts count
-        if self.mounts:
-            repr_str += f", Mounts={len(self.mounts)}"
-        
-        # 5. Close the representation string
+        repr_str = f"<Tab: "
+
+        if hasattr(self, 'tab_id') and self.tab_id:
+            repr_str += f"ID={len(self.tab_id)}"
+
+        if hasattr(self, 'mounts') and self.mounts:
+            repr_str += f", Mnts.={len(self.mounts)}"
+
+        if hasattr(self, 'points') and self.points:
+            repr_str += f", Pnts.={' '.join(self.points.keys())}"
+
         repr_str += ">"
         
         return repr_str
-
+    
+    def __str__(self):
+        # 1. Start with the concise summary from __repr__
+        s = self.__repr__().strip('<>') # Remove the surrounding brackets
+        s = s.replace('ID=', 'ID=') # Ensure clean start
+        
+        # 2. Add detailed geometry information
+        s += "\n--- Detailed Geometry ---"
+        
+        if self.points:
+            # List the keys/IDs of all points in their final order
+            s += f"\n  Perimeter Points ({len(self.points)} Total):"
+            s += f"\n  {', '.join(self.points.keys())}"
+            
+            # Show the array for a specific key for clarity (e.g., Corner A)
+            if 'A' in self.points:
+                coords = self.points['A']
+                # Use .__repr__() for numpy array to be explicit
+                s += f"\n  Corner A Coords: {coords.__repr__()}"
+        else:
+            s += "\n  Perimeter Points: Not Initialized."
+            
+        # 3. Add bend information
+        s += f"\n  Bends ({len(self.bends)}):"
+        if self.bends:
+            for i, bend in enumerate(self.bends):
+                # Assumes Bend has a simple, meaningful repr or str
+                s += f"\n    [{i}]: {bend.__repr__()}"
+        else:
+            s += " None"
+            
+        return s
 
     def copy(self):
         return copy.deepcopy(self)
@@ -92,7 +118,7 @@ class Tab:
         new_points: Dict[str, np.ndarray] = {}
         
         for key, value in self.points.items():
-            if key != point:
+            if key != point_id:
                 new_points[key] = value
                 
         self.points = new_points

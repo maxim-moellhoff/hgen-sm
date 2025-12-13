@@ -28,7 +28,7 @@ class Bend:
         self.BPM = BPM
 
         self.tab_x = tab_x
-        self.tab_z = tab_y
+        self.tab_y = tab_y
         self.tab_z = tab_z
 
     def copy(self):

@@ -10,12 +10,8 @@ with open("config/config.yaml") as f:
 
 import itertools
 
-from src.hgen_sm.data import Part
-from src.hgen_sm.initialization import initialize_objects
-from src.hgen_sm.determine_sequences import determine_sequences
-from src.hgen_sm.create_segments import create_segments 
-from src.hgen_sm.part_assembly import part_assembly
-from src.hgen_sm.plotting.plot_assembly import plot_solutions
+from src.hgen_sm import Part
+from src.hgen_sm import initialize_objects, determine_sequences, create_segments, part_assembly, plot_solutions
 
 def main():
     segment_cfg = cfg.get('design_exploration')
@@ -30,6 +26,7 @@ def main():
 
     # Find ways to connect pairs
     solutions = []
+    part_id: int = 0
     for sequence in sequences:
         segments_library = []
         for pair in sequence:
@@ -43,6 +40,8 @@ def main():
         part.sequence = sequence
         for segments_combination in itertools.product(*segments_library):
             new_part = part
+            part_id += 1
+            new_part.part_id = part_id
             solutions.append(part_assembly(new_part, segments_combination, cfg))
 
     print("--- %s seconds ---" % (time.time() - start_time))

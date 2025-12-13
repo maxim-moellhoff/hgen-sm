@@ -98,8 +98,8 @@ def one_bend(segment):
                 new_tab_z.remove_point(point=CPR)
             
             # ---- Update New Segment with New Tabs and add to Stack
-            new_segment.tab_x = new_tab_x
-            new_segment.tab_z = new_tab_z
+            new_segment.tabs['tab_x'] = new_tab_x
+            new_segment.tabs['tab_z'] = new_tab_z
             segment_library.append(new_segment)
             # inter = None
             # if check_lines_cross(CP, FP, BP): 
