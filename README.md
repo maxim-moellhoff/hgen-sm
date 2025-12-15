@@ -1,6 +1,6 @@
 <p align="center">
   <img src="assets/images/1bend_02.png" alt="Screenshot 1" width="45%"/>
-  <img src="assets/images/3rect_01.png" alt="Screenshot 2" width="45%"/>
+  <img src="assets/images/3rect_02.png" alt="Screenshot 2" width="45%"/>
 </p>
 
 <p align="center">
