@@ -1,6 +1,6 @@
 <p align="center">
   <img src="assets/images/1bend_02.png" alt="Screenshot 1" width="45%"/>
-  <img src="assets/images/1bend_03.png" alt="Screenshot 2" width="45%"/>
+  <img src="assets/images/3rect_01.png" alt="Screenshot 2" width="45%"/>
 </p>
 
 <p align="center">
@@ -37,22 +37,22 @@ In config.yaml you can configure what should get plotted.
 - CP = Corner Point
 - FP = Flange Point
 
-- _A  = Part of Tab A
-- _AB = Connect Tab A and B
+- 0,1,2,... = ID of Tab
 
-- _0 = Middle
-- _1 = Side 1
-- _2 = Side 2
+- A,B,C,D = Corner Points of user input rectangle
+
+- L = Left Side of Flange
+- R = Right Side of Flange
 
 # Development Goals
 - Part generation
 	- [x] Generate solutions for 1 bend
 	- [x] Generate solutions for 2 bend
 	- [x] Improve flange visuals
+	- [x] Extend part generation to multiple squares
 	- [ ] Filter solutions that are unsuitable
 	- [ ] Introduce mounts
 	- [ ] Introduce rule "Minimum distance mount from bend"
-	- [ ] Extend part generation to multiple squares
 	- [ ] Generate solutions by separating surfaces
 - Simulation
 	- [ ] Connect to Onshape API
