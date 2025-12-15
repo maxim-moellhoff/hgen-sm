@@ -7,7 +7,7 @@ def create_segments(segment, segment_cfg):
         # ADD IF RECTANGLES ARE PARALLEL, SKIP!!!
         segment_library.extend(one_bend(segment))
 
-    # if segment_cfg.get('double_bend', True):
-    #     segment_library.append(two_bends(segment))
+    if segment_cfg.get('double_bend', True):
+        segment_library.extend(two_bends(segment))
 
     return segment_library

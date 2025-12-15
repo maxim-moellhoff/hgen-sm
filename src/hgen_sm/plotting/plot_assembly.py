@@ -49,12 +49,12 @@ def plot_part(part, plotter, cfg, solution_idx, len_solutions):
                 points_array = np.array(ordered_coords) 
                 num_points = points_array.shape[0]
                 faces = np.hstack([[num_points], np.arange(num_points)])
-                mesh = pv.PolyData(points_array, faces=faces)
+                mesh = pv.PolyData(points_array, faces=faces).triangulate()
                 plotter.add_mesh(
                     mesh,
                     color=color_tabs,
                     opacity=0.8,
-                    show_edges=True,
+                    show_edges=False,
                     style='surface', 
                     label=f"Tab {tab_id}"
                 )

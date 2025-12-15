@@ -23,3 +23,6 @@ class Segment:
 
     def copy(self):
         return copy.deepcopy(self)
+
+    def add_tab_y(self, tab_y):
+        self.tab_y = tab_y

@@ -1,4 +1,5 @@
-from typing import List, Dict, Any
+from typing import Dict, Any, Optional, List, Set
+import numpy as np
 def extract_tabs_from_segments(tab_id, segments):
     tab_id 
     segments
@@ -9,11 +10,6 @@ def extract_tabs_from_segments(tab_id, segments):
                 tabs.append(segment.tabs[tab])
     return tabs
 
-from typing import Dict, Any, Optional, List, Set, Tuple
-import numpy as np
-
-from typing import Dict, Any, Optional, List, Set
-import numpy as np
 
 def merge_points(tabs: List[Any]) -> Optional[Dict[str, np.ndarray]]:
     """
@@ -106,6 +102,10 @@ def merge_points(tabs: List[Any]) -> Optional[Dict[str, np.ndarray]]:
         
     return final_geometry
 
+def edges_cross_over(part: Any) -> bool:
+    return False
+
+
 def part_assembly(part, segments, cfg):
     segments # =(<Part: Sequence=['0', '1']>, <Part: Sequence=['1', '2']>)
     flat_sequence = [] 
@@ -131,5 +131,8 @@ def part_assembly(part, segments, cfg):
             if new_points == None:
                 return None
             part.tabs[tab_id].points = new_points
+
+    if edges_cross_over(part):
+        return None
 
     return part

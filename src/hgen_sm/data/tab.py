@@ -8,15 +8,18 @@ from .bend import Bend
 
 class Tab:
     """Represents a single, planar section of the SM part"""
-    def __init__(self, tab_id: int, rectangle = None, mounts = None):
+    def __init__(self, tab_id: int, rectangle = None, mounts = None, points = None):
         self.tab_id = tab_id
         self.rectangle: 'Rectangle' = rectangle or None
-        self.points: Dict[str, np.ndarray] = {
-            'A': rectangle.corners['A'],
-            'B': rectangle.corners['B'],
-            'C': rectangle.corners['C'],
-            'D': rectangle.corners['D']
-        }
+        if self.rectangle != None:    
+            self.points: Dict[str, np.ndarray] = {
+                'A': rectangle.corners['A'],
+                'B': rectangle.corners['B'],
+                'C': rectangle.corners['C'],
+                'D': rectangle.corners['D']
+            }
+        elif self.rectangle == None:# and self.points != None: 
+            self.points = points
         self.mounts = []
         self.bends: list['Bend'] = []
         # self.corner_usage: Dict[str, Optional[str]] = {'A': None, 'B': None, 'C': None, 'D': None}

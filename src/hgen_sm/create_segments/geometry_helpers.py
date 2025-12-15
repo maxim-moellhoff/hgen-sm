@@ -6,7 +6,7 @@ from .utils import normalize, perp_toward_plane, closest_points_between_lines
 from config.design_rules import min_flange_width
 
 
-def calculate_plane(rect):
+def calculate_plane(rect = None, triangle = None):
     """
     Given a list of rectangles defined by three points (A, B, C),
     compute the position (centroid) and orientation (normal vector)
@@ -18,7 +18,10 @@ def calculate_plane(rect):
             "Plane[1]": {"position": np.ndarray, "normal": np.ndarray}
         }
     """
-    A, B, C = rect.corners['A'], rect.corners['B'], rect.corners['C']
+    if rect:
+        A, B, C = rect.corners['A'], rect.corners['B'], rect.corners['C']
+    elif triangle:
+        A, B, C = triangle['L'], triangle['R'], triangle['M']
 
     # Compute normal vector
     AB = B - A

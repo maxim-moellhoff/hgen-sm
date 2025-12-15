@@ -3,7 +3,7 @@ import itertools
 
 from config.design_rules import min_flange_width
 from src.hgen_sm.create_segments.geometry_helpers import calculate_plane, calculate_plane_intersection, create_bending_point, calculate_flange_points
-from .utils import check_lines_cross, cord_lines_cross
+from .utils import check_lines_cross, cord_lines_cross, normalize
 
 from ..data.bend import Bend
 
@@ -25,6 +25,29 @@ def are_corners_neighbours(cp_id1: str, cp_id2: str) -> bool:
     
     return normalized_pair in ADJACENT_PAIRS
 
+from typing import Dict, Any, Optional
+
+def next_cp(points_dict: Dict[str, Any], current_key: str) -> Optional[str]:
+    ordered_keys = list(points_dict.keys())
+    
+    try:
+        current_index = ordered_keys.index(current_key)
+        
+        # If the input is the last element (D), return the first element (A)
+        if current_index == len(ordered_keys) - 1:
+            return ordered_keys[0]
+        
+        # Otherwise, return the next element
+        elif current_index + 1 < len(ordered_keys):
+            return ordered_keys[current_index + 1]
+            
+        else:
+            # Should only happen if the dictionary is empty or contains only one point
+            return None
+            
+    except ValueError:
+        return None
+
 def one_bend(segment):
     tab_x = segment.tabs['tab_x']
     tab_x_id = tab_x.tab_id
@@ -39,6 +62,7 @@ def one_bend(segment):
     intersection = calculate_plane_intersection(plane_x, plane_z)
     bend = Bend(position=intersection["position"], orientation=intersection["orientation"])
     
+    CP_keys = ['A', 'B', 'C', 'D']
     
     rect_x_combinations = list(itertools.permutations(rect_x.corners, 2))
     rect_z_combinations = list(itertools.permutations(rect_z.corners, 2))
@@ -78,9 +102,10 @@ def one_bend(segment):
             new_tab_x.insert_points(L=CPL, add_points=bend_points_x)
             
             if not are_corners_neighbours(CP_xL_id, CP_xR_id):
-                CPR = {CP_xR_id: CP_xR} 
-                new_tab_x.remove_point(point=CPR)
-            
+                rm_point_id = next_cp(new_tab_x.rectangle.corners, CP_xL_id)
+                rm_point = new_tab_x.rectangle.corners[rm_point_id]
+                new_tab_x.remove_point(point={rm_point_id: rm_point})
+
             # ---- Insert Points in Tab z----
             CPL = {CP_zL_id: CP_zL}
             bend_points_z = { 
@@ -93,8 +118,9 @@ def one_bend(segment):
             new_tab_z.insert_points(L=CPL, add_points=bend_points_z)
             
             if not are_corners_neighbours(CP_zL_id, CP_zR_id):
-                CPR = {CP_zR_id: CP_zR}
-                new_tab_z.remove_point(point=CPR)
+                rm_point_id = next_cp(new_tab_z.rectangle.corners, CP_zL_id)
+                rm_point = new_tab_z.rectangle.corners[rm_point_id]
+                new_tab_z.remove_point(point={rm_point_id: rm_point})
             
             # ---- Update New Segment with New Tabs and add to Stack
             new_segment.tabs['tab_x'] = new_tab_x
@@ -113,89 +139,122 @@ def one_bend(segment):
 # If there are two bends, there are three planes, which are called A, B and C
 # The first rectangle the user provides is A, and the second one is C, and the one in between B
 def two_bends(segment):
-    rectangles = segment.rectangles
-    tab_x_id = segment.tab_x_id
-    tab_z_id = segment.tab_z_id
+    tab_x = segment.tabs['tab_x']
+    tab_x_id = tab_x.tab_id
+    tab_z = segment.tabs['tab_z']
+    tab_z_id = tab_z.tab_id
 
-    planeA = segment.planes[0]
-    planeC = segment.planes[1]
+    rect_x = tab_x.rectangle
+    rect_z = tab_z.rectangle
 
-    rectA_corners = list(rectangles[0].values())
-    rectC_corners = list(rectangles[1].values())
+    plane_x = calculate_plane(rect_x)
+    plane_z = calculate_plane(rect_z)
 
-    for i, j in [(0,1), (1,2), (2,3), (3,0), (1,0), (2,1), (3,2), (0,3)]:     
-        CPA1 = rectA_corners[i]
-        CPA2 = rectA_corners[j]
-        for i, CPC0 in enumerate(rectC_corners):
-            CPC1 = rectC_corners[(i + 1) % 4]
-            CPC2 = rectC_corners[(i - 1) % 4]
-            rectCmid = (CPC1 + CPC2) / 2
-            new_state = segment.copy()
-            new_state.corner_points.extend([CPA1, CPA2, CPC0, CPC1, CPC2])
+    rect_x_combinations = list(itertools.permutations(rect_x.corners, 2))
+    rect_z_combinations = list(itertools.permutations(rect_z.corners, 2))
+
+    segment_library = []
+    for pair_x in rect_x_combinations:  
+        CPxL_id = pair_x[0]
+        CPxR_id = pair_x[1]
+        CPxL = tab_x.points[CPxL_id]
+        CPxR = tab_x.points[CPxR_id]
+
+        for i, CPzM_id in enumerate(rect_z.corners):
+            new_segment = segment.copy()
+
+            CPzM = rect_z.corners[CPzM_id]
+            CPzL_id = list(rect_z.corners.keys())[(i + 1) % 4]
+            CPzR_id = list(rect_z.corners.keys())[(i - 1) % 4]
+            CPzL = rect_z.corners[CPzL_id]
+            CPzR = rect_z.corners[CPzR_id]
+            CPz_middle = (CPzL + CPzR) / 2
+            CP_triangle = {"L": CPxL, "R": CPxR, "M": CPzM}
+            plane_y = calculate_plane(triangle=CP_triangle)
+            tab_y = Tab(tab_id=tab_x_id + tab_z_id, points =  CP_triangle)
+            tab_y_id = tab_y.tab_id
+            CP_bend_yz = calculate_plane_intersection(plane_y, plane_z)
+            dir_vector_yz = np.cross(plane_z.orientation, CP_bend_yz["orientation"]) 
+            dir_vector_yz /= np.linalg.norm(dir_vector_yz)
+
+            if np.dot(dir_vector_yz, CPz_middle - CPzM) > 0:
+                dir_vector_yz *= -1
+
+            CP_bend_yz["position"] = CP_bend_yz["position"] - min_flange_width * dir_vector_yz
+
+            # ---- Bending Points ----
+            BPzM = CPzM - min_flange_width * dir_vector_yz
+            BPxL = CPxL
+            BPxR = CPxR
+
+            BP_triangle = {"L": BPxL, "R": BPxR, "M": BPzM}
+            plane_y = calculate_plane(triangle=BP_triangle)
+
+            intersection_xy = calculate_plane_intersection(plane_x, plane_y)
+            bend_xy = Bend(position=intersection_xy["position"], orientation=intersection_xy["orientation"])
             
-            CP_triangle = {"pointA": CPA1, "pointB": CPA2, "pointC": CPC0}
-            CP_planeB = calculate_plane(rectangles=[CP_triangle])[0]
-            CP_bendBC = calculate_plane_intersection(planes=[CP_planeB, planeC])
-            dir_vector_BC = np.cross(planeC.orientation, CP_bendBC["direction"]) 
-            dir_vector_BC /= np.linalg.norm(dir_vector_BC)
-
-            if np.dot(dir_vector_BC, CPC0 - rectCmid) > 0:
-                dir_vector_BC *= -1
-
-            CP_bendBC["point"] = CP_bendBC["point"] - min_flange_width * dir_vector_BC
-
-            BPC0 = CPC0 - min_flange_width * dir_vector_BC
-            BPA1 = CPA1
-            BPA2 = CPA2
-
-            BP_triangle = {"pointA": BPA1, "pointB": BPA2, "pointC": BPC0}
-            planeB = calculate_plane(rectangles=[BP_triangle])[0]
-            bendBC = calculate_plane_intersection(planes=[planeB, planeC])
+            intersection_yz = calculate_plane_intersection(plane_y, plane_z)
+            bend_yz = Bend(position=intersection_yz["position"], orientation=intersection_yz["orientation"])
             
-            bendAB = calculate_plane_intersection(planes=[planeA, planeB])
-            
-            dir_vector = np.cross(planeB.orientation, bendAB["direction"])
+            dir_vector = np.cross(plane_y.orientation, bend_xy.orientation)
             dir_vector /= np.linalg.norm(dir_vector)
             
             # creat Flange points for side A on plane B
-            FPAB1 = BPA1 - min_flange_width * dir_vector
-            FPAB2 = BPA2 - min_flange_width * dir_vector
+            FPxyL = BPxL - min_flange_width * dir_vector
+            FPxyR = BPxR - min_flange_width * dir_vector
             
             # create BP1 and BP2 for Side C
-            create_bending_point(CPC1, FPAB1, bendBC)
-            create_bending_point(CPC2, FPAB2, bendBC)
+            create_bending_point(CPzL, FPxyL, bend_yz)
+            create_bending_point(CPzR, FPxyR, bend_yz)
 
             # Create Flange points for side C on plane B
-            BPC1 = BPC0 + np.linalg.norm(BPA1 - BPA2)/2 * normalize(bendBC["direction"])
-            BPC2 = BPC0 - np.linalg.norm(BPA1 - BPA2)/2 * normalize(bendBC["direction"])
+            BPzL = BPzM + np.linalg.norm(BPxL - BPxR)/2 * normalize(bend_yz.orientation)
+            BPzR = BPzM - np.linalg.norm(BPxL - BPxR)/2 * normalize(bend_yz.orientation)
+
+            FPyzL, FPyzR, FPzyL, FPzyR = calculate_flange_points(BPzL, BPzR, plane_y, plane_z)
+
+            # ---- Create new Segment ----
+            new_segment = segment.copy()
+            new_tab_x = new_segment.tabs['tab_x']
+            new_tab_z = new_segment.tabs['tab_z']
+
+            # ---- Insert Points in Tab x----
+            bend_points_x = { 
+                                f"FP{tab_x_id}{tab_y_id}L": FPxyL, 
+                                f"BP{tab_x_id}L": BPxL, 
+                                f"BP{tab_x_id}R": BPxR, 
+                                f"FP{tab_x_id}{tab_y_id}R": FPxyR
+                                }
             
-            FPBC1, FPBC2, FPC1, FPC2 = calculate_flange_points(BPC1, BPC2, planeB, planeC)
+            new_tab_x.insert_points(L={CPxL_id: CPxL}, add_points=bend_points_x)
+            
+            # ---- Insert Points in Tab y----
+            # CPyL = {CPxL_id: CPyL}
+            # bend_points_y = { 
+            #                     f"FP{tab_x_id}{tab_y_id}L": FPxyL, 
+            #                     f"BP{tab_x_id}{tab_y_id}L": BPxL, 
+            #                     f"BP{tab_x_id}{tab_y_id}R": BPxR, 
+            #                     f"FP{tab_x_id}{tab_y_id}R": FPxyR
+            #                     }
+            # tab_y_points = {
 
-            # # create Elements rectA, FlangeA, rectB, Flange C, rectC
-            new_state.flanges.append({"bend_id": 0, "bend": bendAB, "BP1": BPA1, "BP2": BPA2, 
-                                    "FPA1": FPAB1, "FPA2": FPAB2, "FPB1": FPAB1, "FPB2": FPAB2})
-            new_state.flanges.append({"bend_id": 1, "bend": bendBC, "BP1": BPC1, "BP2": BPC2,
-                                      "FPBC1": FPBC1, "FPBC2": FPBC2, "FPC1": FPC1, "FPC2": FPC2})
+            # }
+            
+            # tab_y.insert_points(L=CPyL, add_points=bend_points_y)
+            
+            # ---- Insert Points in Tab x----
+            bend_points_z = { 
+                                f"FP{tab_z_id}{tab_y_id}L": FPzyL, 
+                                f"BP{tab_z_id}L": BPzL, 
+                                f"BP{tab_z_id}R": BPzR, 
+                                f"FP{tab_z_id}{tab_y_id}R": FPzyR
+                                }
+            
+            new_tab_z.insert_points(L={CPzL_id: CPzL}, add_points=bend_points_z)
 
-            new_state.elements.append(turn_points_into_element(rectA_corners))
-            new_state.elements.append(turn_points_into_element([BPA1, FPAB1, FPAB2, BPA2]))
-            new_state.elements.append(turn_points_into_element([FPAB2, FPBC1, FPBC2, FPAB1]))
-            new_state.elements.append(turn_points_into_element([FPBC1, BPC1, BPC2, FPBC2]))
-            new_state.elements.append(turn_points_into_element([BPC1, FPC1, FPC2, BPC2]))
-            new_state.elements.append(turn_points_into_element([FPC1, CPC1, CPC2, FPC2]))
-            segment.elements.append(turn_points_into_element(rectC_corners))
+            # ---- Update and Append Segment ----
+            # new_segment.tabs.update({'tab_y': tab_y})
 
-            new_state.points = {"CPA1": CPA1, "CPA2": CPA2,
-                                "BPA1": BPA1, "BPA2":BPA2, 
-                                "FPAB1":FPAB1, "FPAB2":FPAB2, "FPBC1":FPBC1, "FPBC2":FPBC2, 
-                                "BPC1":BPC1, "BPC2":BPC2, 
-                                "FPC1":FPC1, "FPC2":FPC2,
-                                "CPC1":CPC1, "CPC2":CPC2}
+            segment_library.append(new_segment)
 
-            solutions.append(new_state)
-
-    # for pairB in rectC_combinations:
-    #     for BPA1 in rectA_corners:
-    #         continue
-
-    return solutions
+    return segment_library
