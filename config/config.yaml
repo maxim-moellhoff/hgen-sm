@@ -3,8 +3,13 @@ topologies:
 
 
 design_exploration:
-  single_bend: False
+  single_bend: True
   double_bend : True
+
+filter:
+  Min Flange Width: True
+  Min Bend Angle: True
+  Tabs cover Rects: True
 
 plot:
   Rectangles: True

@@ -57,7 +57,7 @@ def tab_fully_contains_rectangle(tab, rect, tol=1e-7):
 def lines_cross(
     P1: np.ndarray, P2: np.ndarray, 
     P3: np.ndarray, P4: np.ndarray, 
-    epsilon: float = 1e-6
+    epsilon: float = 0.1
 ) -> bool:
     """
     Checks if the 2D segments P1-P2 and P3-P4 intersect.

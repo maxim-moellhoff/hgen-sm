@@ -18,6 +18,7 @@ from src.hgen_sm import initialize_objects, determine_sequences, create_segments
 def main():
     segment_cfg = cfg.get('design_exploration')
     plot_cfg = cfg.get('plot')
+    filter_cfg = cfg.get('filter')
     plotter = pv.Plotter()
 
     # ---- Import user input ----
@@ -36,7 +37,7 @@ def main():
             tab_z = part.tabs[pair[1]]
             segment_tabs = {'tab_x': tab_x, 'tab_z': tab_z}
             segment = Part(sequence=pair, tabs=segment_tabs)
-            segments_library.append(create_segments(segment, segment_cfg))
+            segments_library.append(create_segments(segment, segment_cfg, filter_cfg))
 
         # ---- Assemble Parts ----
 

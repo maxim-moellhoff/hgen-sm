@@ -129,7 +129,7 @@ def plot_solutions(plotter, plot_cfg, solutions):
     plotter.add_key_event("Right", lambda: key_press_callback("Right"))
     plotter.add_key_event("Left", lambda: key_press_callback("Left"))
     show_solution(solution_idx[0])
-    plotter.enable_trackball_style()
+    plotter.enable_trackball_style()    
 
     plotter.show()
 

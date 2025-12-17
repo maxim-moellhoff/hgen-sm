@@ -42,7 +42,7 @@ from shapely.geometry import Polygon
 
 
 
-def one_bend(segment):
+def one_bend(segment, filter_cfg):
     tab_x = segment.tabs['tab_x']
     tab_x_id = tab_x.tab_id
     tab_z = segment.tabs['tab_z']
@@ -152,7 +152,7 @@ def one_bend(segment):
 
     return segment_library
 
-def two_bends(segment):
+def two_bends(segment, filter_cfg):
     tab_x = segment.tabs['tab_x']
     tab_z = segment.tabs['tab_z']
     tab_x_id = tab_x.tab_id
@@ -200,7 +200,7 @@ def two_bends(segment):
             bend_xy = Bend(position=BPxL, orientation=BPxR-BPxL, BPL=BPxL, BPR=BPxR)
 
             # ---- FILTER: Is flange wide enough? ----
-            if not min_flange_width_filter(BPL=BPxL, BPR=BPxR):
+            if not min_flange_width_filter(BPL=BPxL, BPR=BPxR) and filter_cfg.get('Min Flange Width', False):
                 continue
             
             # ---- Create new Segment ----
@@ -209,8 +209,6 @@ def two_bends(segment):
             new_tab_z = new_segment.tabs['tab_z']
 
             # ---- Determine BPzM by projecting on the CPzM, line_plane_intersection, BPzM triangle in min_flange_length direction
-            # Define projection helper
-
             projection_point = line_plane_intersection(CPxL, CPxL - CPxR, plane_z.position, plane_z.orientation)
             
             if projection_point is not None:
@@ -273,6 +271,9 @@ def two_bends(segment):
                 bend_yz = Bend(position=bend_yz_pos, orientation=bend_yz_ori)
                 BPzM = bend_yz.position
 
+                # new_tab_z.remove_point(point={CPzR_id: CPzR})
+
+
             BPzL = project_onto_line(CPzL, bend_yz.position, bend_yz.orientation)
             BPzR = project_onto_line(CPzR, bend_yz.position, bend_yz.orientation)
 
@@ -286,19 +287,16 @@ def two_bends(segment):
             tab_y_id = new_tab_y.tab_id
 
             # ---- FILTER: Is Rule minimal bend angle fullfilled?
-            # if not minimum_angle_filter(plane_x, plane_y): continue
-            # if not minimum_angle_filter(plane_y, plane_z): continue
+            if  filter_cfg.get('Min Bend Angle', False):
+                if not minimum_angle_filter(plane_x, plane_y): continue
+                if not minimum_angle_filter(plane_y, plane_z): continue
             
             # ---- Determine Bending and Flange Points on Side X ----
             FPxyL, FPxyR, FPyxL, FPyxR = calculate_flange_points(BPxL, BPxR, plane_x, plane_y)
 
-            # ---- Determine Bending Points on Side Z ----
-            # BPzL = create_bending_point(CPzL, FPyxL, bend_yz)
-            # BPzR = create_bending_point(CPzR, FPyxR, bend_yz)
-
             # ---- FILTER: Is flange wide enough? ----
-            # if not min_flange_width_filter(BPL=BPzL, BPR=BPzR):
-            #     continue
+            if not min_flange_width_filter(BPL=BPzL, BPR=BPzR) and filter_cfg.get('Min Flange Width', False):
+                continue
 
             # ---- Determine Flange Points on Side Z ----
             FPyzL, FPyzR, FPzyL, FPzyR = calculate_flange_points(BPzL, BPzR, plane_y, plane_z)
@@ -356,14 +354,17 @@ def two_bends(segment):
                                     f"BP{tab_z_id}_{tab_y_id}R": BPzR, 
                                     f"FP{tab_z_id}_{tab_y_id}R": FPzyR
                                     }
-                
-            new_tab_z.insert_points(L={CPzL_id: CPzL}, add_points=bend_points_z)
+            if CPzM_id in new_tab_z.points:    
+                new_tab_z.insert_points(L={CPzM_id: CPzM}, add_points=bend_points_z)
+            else:
+                new_tab_z.insert_points(L={CPzL_id: CPzL}, add_points=bend_points_z)
 
             # ---- FILTER: Do Tabs cover Rects fully? ----
-            if not tab_fully_contains_rectangle(new_tab_x, rect_x):
-                continue
-            if not tab_fully_contains_rectangle(new_tab_z, rect_z):
-                continue
+            if filter_cfg.get('Tabs cover Rects', False):
+                if not tab_fully_contains_rectangle(new_tab_x, rect_x):
+                    continue
+                if not tab_fully_contains_rectangle(new_tab_z, rect_z):
+                    continue
 
             new_segment.tabs = {'tab_x':new_tab_x, 'tab_y': new_tab_y, 'tab_z': new_tab_z}
 
