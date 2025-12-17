@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="assets/images/1bend_02.png" alt="Screenshot 1" width="45%"/>
-  <img src="assets/images/3rect_02.png" alt="Screenshot 2" width="45%"/>
+  <img src="assets/images/2bend_05.png" alt="Screenshot 3" width="45%"/>
+  <img src="assets/images/1bend_02.png" alt="Screenshot 4" width="45%"/>
 </p>
 <p align="center">
-  <img src="assets/images/2bend_05.png" alt="Screenshot 3" width="45%"/>
-  <img src="assets/images/2bend_06.png" alt="Screenshot 4" width="45%"/>
+  <img src="assets/images/3rect_06.png" alt="Screenshot 1" width="45%"/>
+  <img src="assets/images/3rect_08.png" alt="Screenshot 2" width="45%"/>
 </p>
 <p align="center">
   <img src="assets/images/3rect_03.png" alt="Screenshot 1" width="45%"/>
@@ -51,7 +51,7 @@ In config.yaml you can configure what should get plotted.
 	- [x] Generate solutions for 1 bend
 	- [x] Generate solutions for 2 bend
 	- [x] Improve flange visuals
-	- [x] Extend part generation to multiple squares
+	- [x] Extend part generation to multiple rectangles
 	- [x] Filter solutions that are unsuitable
 	- [ ] Introduce mounts
 	- [ ] Introduce rule "Minimum distance mount from bend"
