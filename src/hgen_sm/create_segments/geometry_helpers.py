@@ -19,7 +19,7 @@ def calculate_plane(rect = None, triangle = None):
         }
     """
     if rect:
-        A, B, C = rect.corners['A'], rect.corners['B'], rect.corners['C']
+        A, B, C = rect.points['A'], rect.points['B'], rect.points['C']
     elif triangle:
         A, B, C = triangle['A'], triangle['B'], triangle['C']
 

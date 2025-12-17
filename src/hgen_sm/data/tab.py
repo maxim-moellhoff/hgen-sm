@@ -13,10 +13,10 @@ class Tab:
         self.rectangle: 'Rectangle' = rectangle or None
         if self.rectangle != None:    
             self.points: Dict[str, np.ndarray] = {
-                'A': rectangle.corners['A'],
-                'B': rectangle.corners['B'],
-                'C': rectangle.corners['C'],
-                'D': rectangle.corners['D']
+                'A': rectangle.points['A'],
+                'B': rectangle.points['B'],
+                'C': rectangle.points['C'],
+                'D': rectangle.points['D']
             }
         elif self.rectangle == None:# and self.points != None: 
             self.points = points

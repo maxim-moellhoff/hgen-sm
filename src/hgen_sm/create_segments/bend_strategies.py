@@ -4,67 +4,13 @@ import itertools
 from config.design_rules import min_flange_length
 from src.hgen_sm.create_segments.geometry_helpers import calculate_plane, calculate_plane_intersection, create_bending_point, calculate_flange_points
 from .utils import check_lines_cross, cord_lines_cross, normalize, line_plane_intersection
-
+from .filters import min_flange_width_filter, tab_fully_contains_rectangle, lines_cross, are_corners_neighbours
 from ..data.bend import Bend
 
 from hgen_sm.data import Part, Tab, Rectangle
+from typing import Set, Tuple, Any, Dict
 
-from typing import Set, Tuple
-
-def lines_cross(
-    P1: np.ndarray, P2: np.ndarray, 
-    P3: np.ndarray, P4: np.ndarray, 
-    epsilon: float = 1e-6
-) -> bool:
-    """
-    Checks if the 2D segments P1-P2 and P3-P4 intersect.
-    
-    This function uses a 2D cross product check for segment intersection.
-    Assumes points are already projected onto a 2D plane (e.g., ignores the Z-coordinate
-    if the segment is planar to the XY plane).
-    """
-    
-    # Simple projection to 2D (ignoring Z)
-    p1 = P1[:2]
-    p2 = P2[:2]
-    p3 = P3[:2]
-    p4 = P4[:2]
-
-    def cross_product_2d(a, b, c) -> float:
-        """Calculates the 2D cross product (orientation) of vectors (b-a) and (c-a)"""
-        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
-
-    o1 = cross_product_2d(p1, p2, p3)
-    o2 = cross_product_2d(p1, p2, p4)
-    o3 = cross_product_2d(p3, p4, p1)
-    o4 = cross_product_2d(p3, p4, p2)
-
-    # General Case: Segments intersect if and only if the orientation 
-    # of the three points (o1, o2) flips, and (o3, o4) flips.
-    if (o1 * o2 < -epsilon) and (o3 * o4 < -epsilon):
-        return True
-
-    # Collinear/Boundary cases (often needed for full robustness, 
-    # but excluded here for minimal complexity)
-    return False
-
-def are_corners_neighbours(cp_id1: str, cp_id2: str) -> bool:
-    """Checks if two corner IDs are adjacent on the perimeter of the rectangle."""
-    
-    # Define all valid, adjacent (non-directional) pairs
-    # Using a Set of Tuples ensures fast, order-independent lookup.
-    ADJACENT_PAIRS: Set[Tuple[str, str]] = {
-        ('A', 'B'), ('B', 'C'), ('C', 'D'), ('D', 'A')
-    }
-    
-    # Normalize the input by sorting the IDs to handle both ('A', 'B') and ('B', 'A')
-    normalized_pair = tuple(sorted((cp_id1, cp_id2)))
-    
-    return normalized_pair in ADJACENT_PAIRS
-
-from typing import Dict, Any, Optional
-
-def next_cp(points_dict: Dict[str, Any], current_key: str) -> Optional[str]:
+def next_cp(points_dict: Dict[str, Any], current_key: str):
     ordered_keys = list(points_dict.keys())
     
     try:
@@ -84,6 +30,17 @@ def next_cp(points_dict: Dict[str, Any], current_key: str) -> Optional[str]:
             
     except ValueError:
         return None
+    
+from typing import List, Dict
+from hgen_sm.data import Tab, Rectangle # Assuming these classes are available
+
+import numpy as np
+
+import numpy as np
+import shapely
+from shapely.geometry import Polygon
+
+
 
 def one_bend(segment):
     tab_x = segment.tabs['tab_x']
@@ -99,8 +56,8 @@ def one_bend(segment):
     intersection = calculate_plane_intersection(plane_x, plane_z)
     bend = Bend(position=intersection["position"], orientation=intersection["orientation"])
     
-    rect_x_combinations = list(itertools.permutations(rect_x.corners, 2))
-    rect_z_combinations = list(itertools.permutations(rect_z.corners, 2))
+    rect_x_combinations = list(itertools.permutations(rect_x.points, 2))
+    rect_z_combinations = list(itertools.permutations(rect_z.points, 2))
 
     segment_library = []
     for pair_x in rect_x_combinations:
@@ -141,9 +98,10 @@ def one_bend(segment):
             new_tab_x.insert_points(L=CPL, add_points=bend_points_x)
             
             if not are_corners_neighbours(CP_xL_id, CP_xR_id):
-                rm_point_id = next_cp(new_tab_x.rectangle.corners, CP_xL_id)
-                rm_point = new_tab_x.rectangle.corners[rm_point_id]
+                rm_point_id = next_cp(new_tab_x.rectangle.points, CP_xL_id)
+                rm_point = new_tab_x.rectangle.points[rm_point_id]
                 new_tab_x.remove_point(point={rm_point_id: rm_point})
+
 
             # ---- Insert Points in Tab z----
             CPL = {CP_zL_id: CP_zL}
@@ -165,9 +123,15 @@ def one_bend(segment):
             new_tab_z.insert_points(L=CPL, add_points=bend_points_z)
             
             if not are_corners_neighbours(CP_zL_id, CP_zR_id):
-                rm_point_id = next_cp(new_tab_z.rectangle.corners, CP_zL_id)
-                rm_point = new_tab_z.rectangle.corners[rm_point_id]
+                rm_point_id = next_cp(new_tab_z.rectangle.points, CP_zL_id)
+                rm_point = new_tab_z.rectangle.points[rm_point_id]
                 new_tab_z.remove_point(point={rm_point_id: rm_point})
+            
+            # ---- FILTER: Do Tabs cover Rects fully? ----
+            if not tab_fully_contains_rectangle(new_tab_x, rect_x):
+                continue
+            if not tab_fully_contains_rectangle(new_tab_z, rect_z):
+                continue
             
             # ---- Update New Segment with New Tabs and add to Stack
             new_segment.tabs['tab_x'] = new_tab_x
@@ -188,7 +152,7 @@ def two_bends(segment):
     plane_x = calculate_plane(rect_x)
     plane_z = calculate_plane(rect_z)
 
-    # rect_x_combinations = list(itertools.permutations(rect_x.corners, 2))
+    # rect_x_combinations = list(itertools.permutations(rect_x.points, 2))
     rect_x_combinations = [
         ('A', 'B'),
         ('B', 'C'),
@@ -207,19 +171,19 @@ def two_bends(segment):
         CPxL = tab_x.points[CPxL_id]
         CPxR = tab_x.points[CPxR_id]
 
-        for i, CPzM_id in enumerate(rect_z.corners):
+        for i, CPzM_id in enumerate(rect_z.points):
             new_segment = segment.copy()
 
-            CPzM = rect_z.corners[CPzM_id]
-            CPz_plus1_id = list(rect_z.corners.keys())[(i + 1) % 4]
-            CPz_minus1_id = list(rect_z.corners.keys())[(i - 1) % 4]
-            CPz_plus1 = rect_z.corners[CPz_plus1_id]
-            CPz_minus1 = rect_z.corners[CPz_minus1_id]
+            CPzM = rect_z.points[CPzM_id]
+            CPz_plus1_id = list(rect_z.points.keys())[(i + 1) % 4]
+            CPz_minus1_id = list(rect_z.points.keys())[(i - 1) % 4]
+            CPz_plus1 = rect_z.points[CPz_plus1_id]
+            CPz_minus1 = rect_z.points[CPz_minus1_id]
 
             CPzL = CPz_minus1
             CPzR = CPz_plus1
 
-            pts = np.array([rect_z.corners['A'], rect_z.corners['B'], rect_z.corners['C'], rect_z.corners['D']])
+            pts = np.array([rect_z.points['A'], rect_z.points['B'], rect_z.points['C'], rect_z.points['D']])
             rect_z_centroid = pts.mean(axis=0)
             
             BPxL = CPxL 
@@ -326,6 +290,12 @@ def two_bends(segment):
                                 }
             
             new_tab_z.insert_points(L={CPz_plus1_id: CPz_plus1}, add_points=bend_points_z)
+
+            # ---- FILTER: Do Tabs cover Rects fully? ----
+            if not tab_fully_contains_rectangle(new_tab_x, rect_x):
+                continue
+            if not tab_fully_contains_rectangle(new_tab_z, rect_z):
+                continue
 
             new_segment.tabs = {'tab_x':new_tab_x, 'tab_y': new_tab_y, 'tab_z': new_tab_z}
 

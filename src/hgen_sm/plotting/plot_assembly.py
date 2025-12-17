@@ -42,7 +42,7 @@ def plot_part(part, plotter, cfg, solution_idx, len_solutions):
             
             # Check if this specific tab has a 'rectangles' attribute/property
             if getattr(tab_obj, 'rectangle', None):
-                corners = tab_obj.rectangle.corners
+                corners = tab_obj.rectangle.points
                 pts = np.array([corners['A'], corners['B'], corners['C'], corners['D']])
                 
                 # Define the single quadrilateral face (4 points: 0, 1, 2, 3)
@@ -74,12 +74,12 @@ def plot_part(part, plotter, cfg, solution_idx, len_solutions):
                 points_array = np.array(ordered_coords) 
                 num_points = points_array.shape[0]
                 faces = np.hstack([[num_points], np.arange(num_points)])
-                mesh = pv.PolyData(points_array, faces=faces).triangulate()
+                mesh = pv.PolyData(points_array, faces=faces)#.triangulate()
                 plotter.add_mesh(
                     mesh,
                     color=color_tabs,
                     opacity=0.8,
-                    show_edges=False,
+                    show_edges=True,
                     style='surface', 
                     label=f"Tab {tab_id}"
                 )

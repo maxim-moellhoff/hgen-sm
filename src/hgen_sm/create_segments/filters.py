@@ -1,0 +1,106 @@
+from config.design_rules import min_flange_width, min_flange_length
+
+import numpy as np
+from shapely import Polygon
+
+# ---------- FILTER: BPC1 und BPC2 dürfen nicht zu nah beieinander sein ----------
+def min_flange_width_filter(BPL, BPR):
+    """Returns Talse if Bending Points are too close together"""
+    min_distance_BPC = min_flange_width  # Minimale Distanz zwischen BPC1 und BPC2
+    distance_BPC = np.linalg.norm(BPL - BPR)
+    if distance_BPC < min_distance_BPC:
+        return False  # Überspringe diese Lösung
+    return True
+
+def tab_fully_contains_rectangle(tab, rect, tol=1e-7):
+    """Returns True if rectangle is fully contained in the tab"""
+    tab_pts = np.array(list(tab.points.values()))
+    rect_pts = np.array(list(rect.points.values()))
+
+    # 1. Determine the Plane Basis
+    # Use two vectors on the plane to create a local 2D coordinate system
+    # We'll use the first three points of the rectangle to define the plane
+    p0 = rect_pts[0]
+    v1 = rect_pts[1] - p0
+    v2 = rect_pts[2] - p0
+    
+    # Normal vector
+    normal = np.cross(v1, v2)
+    norm = np.linalg.norm(normal)
+    if norm < 1e-9: return False # Points are collinear
+    normal /= norm
+
+    # Create local X and Y axes (u, v) for the plane
+    u_axis = v1 / np.linalg.norm(v1)
+    v_axis = np.cross(normal, u_axis)
+
+    def project_to_local_2d(pts):
+        """Projects 3D points onto the local (u, v) coordinates of the plane."""
+        # Translate to origin, then dot product with local axes
+        shifted = pts - p0
+        u = np.dot(shifted, u_axis)
+        v = np.dot(shifted, v_axis)
+        return np.column_stack((u, v))
+
+    # 2. Convert all points to the same local 2D space
+    tab_2d = project_to_local_2d(tab_pts)
+    rect_2d = project_to_local_2d(rect_pts)
+    
+    # 3. Perform Shapely Check
+    tab_poly = Polygon(tab_2d).buffer(tol) # Small buffer for rounding
+    rect_poly = Polygon(rect_2d)
+    
+    return tab_poly.contains(rect_poly)
+
+def lines_cross(
+    P1: np.ndarray, P2: np.ndarray, 
+    P3: np.ndarray, P4: np.ndarray, 
+    epsilon: float = 1e-6
+) -> bool:
+    """
+    Checks if the 2D segments P1-P2 and P3-P4 intersect.
+    
+    This function uses a 2D cross product check for segment intersection.
+    Assumes points are already projected onto a 2D plane (e.g., ignores the Z-coordinate
+    if the segment is planar to the XY plane).
+    """
+    
+    # Simple projection to 2D (ignoring Z)
+    p1 = P1[:2]
+    p2 = P2[:2]
+    p3 = P3[:2]
+    p4 = P4[:2]
+
+    def cross_product_2d(a, b, c) -> float:
+        """Calculates the 2D cross product (orientation) of vectors (b-a) and (c-a)"""
+        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+
+    o1 = cross_product_2d(p1, p2, p3)
+    o2 = cross_product_2d(p1, p2, p4)
+    o3 = cross_product_2d(p3, p4, p1)
+    o4 = cross_product_2d(p3, p4, p2)
+
+    # General Case: Segments intersect if and only if the orientation 
+    # of the three points (o1, o2) flips, and (o3, o4) flips.
+    if (o1 * o2 < -epsilon) and (o3 * o4 < -epsilon):
+        return True
+
+    # Collinear/Boundary cases (often needed for full robustness, 
+    # but excluded here for minimal complexity)
+    return False
+
+def are_corners_neighbours(cp_id1: str, cp_id2: str) -> bool:
+    """Checks if two corner IDs are adjacent on the perimeter of the rectangle."""
+    
+    # Define all valid, adjacent (non-directional) pairs
+    # Using a Set of Tuples ensures fast, order-independent lookup.
+    ADJACENT_PAIRS: Set[Tuple[str, str]] = {
+        ('A', 'B'), ('B', 'C'), ('C', 'D'), ('D', 'A')
+    }
+    
+    # Normalize the input by sorting the IDs to handle both ('A', 'B') and ('B', 'A')
+    normalized_pair = tuple(sorted((cp_id1, cp_id2)))
+    
+    return normalized_pair in ADJACENT_PAIRS
+
+from typing import Dict, Any, Optional

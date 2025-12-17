@@ -12,7 +12,7 @@ class Rectangle:
         C = np.array(C, dtype=np.float64)
         A, B, C, D = self.determine_fourth_point(A, B, C)
 
-        self.corners = {
+        self.points = {
             'A': np.array(A, dtype=np.float64), 
             'B': np.array(B, dtype=np.float64), 
             'C': np.array(C, dtype=np.float64), 

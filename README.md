@@ -52,7 +52,7 @@ In config.yaml you can configure what should get plotted.
 	- [x] Generate solutions for 2 bend
 	- [x] Improve flange visuals
 	- [x] Extend part generation to multiple squares
-	- [ ] Filter solutions that are unsuitable
+	- [x] Filter solutions that are unsuitable
 	- [ ] Introduce mounts
 	- [ ] Introduce rule "Minimum distance mount from bend"
 	- [ ] Generate solutions by separating surfaces

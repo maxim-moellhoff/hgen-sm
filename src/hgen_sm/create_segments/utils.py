@@ -125,11 +125,9 @@ def line_plane_intersection(
         if abs(np.dot(plane_normal, PA_minus_P0)) < epsilon:
             # Line is in the plane (infinite intersections)
             # We return None as a specific intersection point cannot be determined
-            print("ERROR: Line is on plane") 
             return None
         else:
             # Line is parallel and outside the plane (no intersection)
-            print("ERROR: Line is parallel")
             return None
 
     # Calculate the parameter t for the line equation
