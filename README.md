@@ -53,6 +53,8 @@ In config.yaml you can configure what should get plotted.
 	- [x] Improve flange visuals
 	- [x] Extend part generation to multiple rectangles
 	- [x] Filter solutions that are unsuitable
+	- [ ] Add flange elements in plot
+	- [ ] Introduce collision filter
 	- [ ] Introduce mounts
 	- [ ] Introduce rule "Minimum distance mount from bend"
 	- [ ] Generate solutions by separating surfaces
