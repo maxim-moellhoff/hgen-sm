@@ -1,4 +1,4 @@
-from config.design_rules import min_flange_width, min_flange_length, min_bend_angle
+from config.design_rules import min_flange_width, min_bend_angle
 
 import numpy as np
 from shapely import Polygon
@@ -107,7 +107,7 @@ def are_corners_neighbours(cp_id1: str, cp_id2: str) -> bool:
     
     return normalized_pair in ADJACENT_PAIRS
 
-def minimum_angle_filter(planeA, planeB, min_bend_angle=35.0):
+def minimum_angle_filter(planeA, planeB, min_bend_angle=min_bend_angle):
     """Returns True if the bend angle between two planes is >= min_bend_angle."""
     
     # Normalize vectors just in case they aren't unit vectors
@@ -126,5 +126,3 @@ def minimum_angle_filter(planeA, planeB, min_bend_angle=35.0):
     # 0 deg = flat, 90 deg = L-bend. 
     bend_angle = angle_deg    
     return bend_angle >= min_bend_angle
-
-from typing import Dict, Any, Optional

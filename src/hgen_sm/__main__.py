@@ -7,7 +7,6 @@ import yaml
 from config.user_input import RECTANGLE_INPUTS
 with open("config/config.yaml") as f:
     cfg = yaml.load(f, Loader=yaml.FullLoader)
-import pdb; 
 import copy
 
 import itertools

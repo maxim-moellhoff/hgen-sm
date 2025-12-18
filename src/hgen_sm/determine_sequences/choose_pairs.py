@@ -1,13 +1,13 @@
-from typing import List, Dict, Any
+from typing import List
 from src.hgen_sm.data import *
-
 def determine_sequences(part, cfg):
+
     topo_cfg = cfg.get('topologies', {})
     tabs = part.tabs
     tab_ids: List[int] = [tab.tab_id for tab in tabs.values()]
 
     sequence = []
-
+    
     if topo_cfg.get('simple_topology', True):
         pair_sequence = []
         for i in range(len(tab_ids) - 1): 
