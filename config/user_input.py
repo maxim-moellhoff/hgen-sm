@@ -57,6 +57,11 @@ D = [
         'pointA': [3, 0, 10],
         'pointB': [3, 3, 10],
         'pointC': [8, 3, 10]
+    },
+    {
+        'pointA': [6, 0, 5],
+        'pointB': [6, 3, 5],
+        'pointC': [14, 3, 5]
     }
 ]
 
@@ -73,5 +78,19 @@ two_parallel = [
     }
 ]
 
+same_plane = [
+    {
+        'pointA': [0, 0, 0],
+        'pointB': [5, 0, 0],
+        'pointC': [5, 5, 0]
+    },
+    {
+        'pointA': [15, 0, 0],
+        'pointB': [20, 0, 0],
+        'pointC': [20, 5, 0]
+    }
+]
 
-RECTANGLE_INPUTS = A
+
+
+RECTANGLE_INPUTS = D
