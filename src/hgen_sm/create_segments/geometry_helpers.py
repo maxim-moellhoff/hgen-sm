@@ -1,8 +1,10 @@
 import numpy as np
 import pyvista as pv
 from types import SimpleNamespace
+from typing import Any, Dict
 
-from .utils import normalize, perp_toward_plane, closest_points_between_lines
+
+from src.hgen_sm.create_segments.utils import normalize, perp_toward_plane, closest_points_between_lines
 from config.design_rules import min_flange_length
 
 
@@ -99,3 +101,25 @@ def turn_points_into_element(points):
     mesh = pv.PolyData(points, faces)
 
     return mesh
+
+def next_cp(points_dict: Dict[str, Any], current_key: str):
+    ordered_keys = list(points_dict.keys())
+    
+    try:
+        current_index = ordered_keys.index(current_key)
+        
+        # If the input is the last element (D), return the first element (A)
+        if current_index == len(ordered_keys) - 1:
+            return ordered_keys[0]
+        
+        # Otherwise, return the next element
+        elif current_index + 1 < len(ordered_keys):
+            return ordered_keys[current_index + 1]
+            
+        else:
+            # Should only happen if the dictionary is empty or contains only one point
+            return None
+            
+    except ValueError:
+        return None
+

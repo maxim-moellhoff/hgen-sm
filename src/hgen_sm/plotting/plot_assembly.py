@@ -1,12 +1,12 @@
 import numpy as np
 import pyvista as pv
 
-def plot_part(part, plotter, cfg, solution_idx, len_solutions):
-    if plotter is None or cfg is None:
+def plot_part(part, plotter, plot_cfg, solution_idx, len_solutions):
+    if plotter is None or plot_cfg is None:
         return
     
-    standard_point_size = cfg.get('point_size', 20)
-    standard_font_size = cfg.get('font_size', 30)
+    standard_point_size = plot_cfg.get('point_size', 20)
+    standard_font_size = plot_cfg.get('font_size', 30)
 
     color_rectangle = "#785ef0"
     color_tabs = "#648fff"
@@ -15,7 +15,7 @@ def plot_part(part, plotter, cfg, solution_idx, len_solutions):
     color_BP1 = "#dc267f"
     color_BP2 = "#26dc83"
 
-    if cfg.get('Legend', True):
+    if plot_cfg.get('Legend', True):
         legend_text = """
     BP = Bending Point
     CP = Corner Point
@@ -35,7 +35,7 @@ def plot_part(part, plotter, cfg, solution_idx, len_solutions):
         plotter.add_text(part.comment[0], position="lower_left", font_size=15, color="black")
 
     # Plot rectangles
-    if cfg.get('Rectangles', False):
+    if plot_cfg.get('Rectangles', False):
         
         # 1. Loop through all tabs in the part
         for tab_id, tab_obj in part.tabs.items():
@@ -67,14 +67,14 @@ def plot_part(part, plotter, cfg, solution_idx, len_solutions):
                         show_points=False # Do not plot a visible dot at the center
                     )
 
-    if cfg.get('Tabs', False) and getattr(part, 'tabs', None):   
+    if plot_cfg.get('Tabs', False) and getattr(part, 'tabs', None):   
         for tab_id, tab_obj in part.tabs.items():
             if tab_obj.points: 
                 ordered_coords = list(tab_obj.points.values())
                 points_array = np.array(ordered_coords) 
                 num_points = points_array.shape[0]
                 faces = np.hstack([[num_points], np.arange(num_points)])
-                if cfg.get('Triangulate Tabs', False):
+                if plot_cfg.get('Triangulate Tabs', False):
                     mesh = pv.PolyData(points_array, faces=faces).triangulate()
                 else: 
                     mesh = pv.PolyData(points_array, faces=faces)
@@ -108,7 +108,7 @@ def plot_part(part, plotter, cfg, solution_idx, len_solutions):
     plotter.show_grid()
     plotter.render()
 
-def plot_solutions(plotter, plot_cfg, solutions):
+def plot_solutions(solutions, plot_cfg, plotter=pv.Plotter()):
     """
     Create interactive plotting window, which can be cycled through to explore all the solutions.
     """
@@ -116,7 +116,7 @@ def plot_solutions(plotter, plot_cfg, solutions):
     def show_solution(idx):
         plotter.clear()
         part = solutions[idx]
-        plot_part(part, plotter=plotter, cfg=plot_cfg, solution_idx=solution_idx[0]+1, len_solutions=len(solutions))
+        plot_part(part, plotter=plotter, plot_cfg=plot_cfg, solution_idx=solution_idx[0]+1, len_solutions=len(solutions))
 
     def key_press_callback(key):
         if key == 'Right':

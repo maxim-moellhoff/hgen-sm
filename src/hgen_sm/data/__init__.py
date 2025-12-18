@@ -1,6 +1,5 @@
 from .bend import Bend
 from .mount import Mount
-from .pair import Pair
 from .part import Part
 from .rectangle import Rectangle
 from .segment import Segment

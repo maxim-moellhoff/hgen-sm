@@ -1,7 +1,6 @@
 import time
 start_time = time.time()
 
-import pyvista as pv
 import yaml
 
 from config.user_input import RECTANGLE_INPUTS
@@ -18,7 +17,6 @@ def main():
     segment_cfg = cfg.get('design_exploration')
     plot_cfg = cfg.get('plot')
     filter_cfg = cfg.get('filter')
-    plotter = pv.Plotter()
 
     # ---- Import user input ----
     part = initialize_objects(RECTANGLE_INPUTS)
@@ -59,7 +57,7 @@ def main():
         return
     
     #  ---- plot solutions ----
-    plot_solutions(plotter, plot_cfg, solutions)
+    plot_solutions(solutions, plot_cfg = plot_cfg)
 
 if __name__ == '__main__':
     main()

@@ -2,45 +2,10 @@ import numpy as np
 import itertools
 
 from config.design_rules import min_flange_length
-from src.hgen_sm.create_segments.geometry_helpers import calculate_plane, calculate_plane_intersection, create_bending_point, calculate_flange_points
-from .utils import check_lines_cross, cord_lines_cross, normalize, line_plane_intersection, project_onto_line
-from .filters import min_flange_width_filter, tab_fully_contains_rectangle, lines_cross, are_corners_neighbours, minimum_angle_filter
-from ..data.bend import Bend
-
-from hgen_sm.data import Part, Tab, Rectangle
-from typing import Set, Tuple, Any, Dict
-
-def next_cp(points_dict: Dict[str, Any], current_key: str):
-    ordered_keys = list(points_dict.keys())
-    
-    try:
-        current_index = ordered_keys.index(current_key)
-        
-        # If the input is the last element (D), return the first element (A)
-        if current_index == len(ordered_keys) - 1:
-            return ordered_keys[0]
-        
-        # Otherwise, return the next element
-        elif current_index + 1 < len(ordered_keys):
-            return ordered_keys[current_index + 1]
-            
-        else:
-            # Should only happen if the dictionary is empty or contains only one point
-            return None
-            
-    except ValueError:
-        return None
-    
-from typing import List, Dict
-from hgen_sm.data import Tab, Rectangle # Assuming these classes are available
-
-import numpy as np
-
-import numpy as np
-import shapely
-from shapely.geometry import Polygon
-
-
+from src.hgen_sm.create_segments.geometry_helpers import calculate_plane, calculate_plane_intersection, create_bending_point, calculate_flange_points, next_cp
+from src.hgen_sm.create_segments.utils import line_plane_intersection, project_onto_line
+from src.hgen_sm.create_segments.filters import min_flange_width_filter, tab_fully_contains_rectangle, lines_cross, are_corners_neighbours, minimum_angle_filter
+from src.hgen_sm.data import Bend, Tab    
 
 def one_bend(segment, filter_cfg):
     tab_x = segment.tabs['tab_x']

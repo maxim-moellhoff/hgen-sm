@@ -55,56 +55,6 @@ def perp_toward_plane(plane, BP0, bend_dir):
     return perp * sign
 
 from shapely.geometry import LineString, Polygon
-
-def check_lines_cross(CP, FP, BP):
-    """
-    Returns true, if the input has lines crossing, and therefore is invalid
-    """
-    # Define the lines
-    LineA1 = LineString([CP["CPA1"], FP["FPA1"]])
-    LineA2 = LineString([CP["CPA2"], FP["FPA2"]])
-    LineB1 = LineString([CP["CPB1"], FP["FPB1"]])
-    LineB2 = LineString([CP["CPB2"], FP["FPB2"]])
-    
-    # Find intersection of the two lines
-    interA = LineA1.intersection(LineA2)
-    interB = LineB1.intersection(LineB2)
-
-    intersection_free = interA.is_empty and interB.is_empty
-    if intersection_free: return False
-
-   # Define the quadrilateral (the region of interest)
-    quadA = Polygon([CP["CPA1"], FP["FPA1"], FP["FPA2"], CP["CPA2"]])
-    quadB = Polygon([CP["CPB1"], FP["FPB1"], FP["FPB2"], CP["CPB2"]])
-    if interA.within(quadA) or interB.within(quadB): 
-        return True
-
-    return False
-
-def cord_lines_cross(CP, FP, BP): # FOR DEBUGGING
-    """
-    Returns true, if the input has lines crossing, and therefore is invalid
-    """
-    # Define the lines
-    LineA1 = LineString([CP["CPA1"], FP["FPA1"]])
-    LineA2 = LineString([CP["CPA2"], FP["FPA2"]])
-    LineB1 = LineString([CP["CPB1"], FP["FPB1"]])
-    LineB2 = LineString([CP["CPB2"], FP["FPB2"]])
-    
-    # Find intersection of the two lines
-    interA = LineA1.intersection(LineA2)
-    interB = LineB1.intersection(LineB2)
-
-    intersection_free = interA.is_empty and interB.is_empty
-    if intersection_free: return False
-
-   # Define the quadrilateral (the region of interest)
-    quadA = Polygon([CP["CPA1"], FP["FPA1"], FP["FPA2"], CP["CPA2"]])
-    quadB = Polygon([CP["CPB1"], FP["FPB1"], FP["FPB2"], CP["CPB2"]])
-    if interA.within(quadA):
-        return interA
-    if interB.within(quadB):
-        return interB
     
 
 def line_plane_intersection(
