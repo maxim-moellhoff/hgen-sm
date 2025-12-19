@@ -54,9 +54,9 @@ D = [
         'pointC': [-40, 40, 80]
     },
     {
-        'pointA': [30, 0, 10],
-        'pointB': [30, 30, 10],
-        'pointC': [80, 30, 10]
+        'pointA': [30, 0, 100],
+        'pointB': [30, 30, 100],
+        'pointC': [80, 30, 100]
     },
     {
         'pointA': [60, 0, 50],
@@ -93,4 +93,4 @@ same_plane = [
 
 
 
-RECTANGLE_INPUTS = A
+RECTANGLE_INPUTS = D
