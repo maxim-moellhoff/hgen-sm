@@ -49,6 +49,7 @@ def export_to_json(part, output_dir="exports"):
     print(f"Exported solution to: {filepath}")
     return filepath
 
+# WARNING: THIS SECTION IS STILL EXPERIMENTAL
 def export_to_onshape(part, output_dir="exports"):
     part_json = create_part_json(part)
     # Vector helpers

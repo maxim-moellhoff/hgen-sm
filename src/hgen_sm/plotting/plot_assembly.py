@@ -109,14 +109,14 @@ def plot_part(part, plotter, plot_cfg, solution_idx, len_solutions):
     # --- Export Button ---
     def callback_text(part, state):
         if state:
-            export_to_json(part, solution_id = solution_idx)
+            export_to_json(part)
             # plotter.add_checkbox_button_widget(partial(callback_text, part), value=False, position=(15, 80)) # Reset button state so it can be clicked again
     plotter.add_checkbox_button_widget(partial(callback_text, part), position=(15,80), color_on='green')
     plotter.add_text("Export JSON", position=(80, 85), font_size=18)
 
     def callback_onshape(part, state):
         if state:
-            export_to_onshape(part, solution_id=solution_idx)
+            export_to_onshape(part)
             # plotter.add_checkbox_button_widget(partial(callback_onshape, part), value=False, position=(15, 15)) # Reset button state so it can be clicked again
     plotter.add_checkbox_button_widget(partial(callback_onshape, part), position=(15,15), color_on='green')
     plotter.add_text("Export Onshape Feature Script", position=(80, 20), font_size=18)
