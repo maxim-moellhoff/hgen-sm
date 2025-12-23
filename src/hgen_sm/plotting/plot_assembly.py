@@ -116,7 +116,7 @@ def plot_part(part, plotter, plot_cfg, solution_idx, len_solutions):
 
     def callback_onshape(part, state):
         if state:
-            export_to_onshape(part)
+            export_to_onshape(part, solution_id=solution_idx)
             # plotter.add_checkbox_button_widget(partial(callback_onshape, part), value=False, position=(15, 15)) # Reset button state so it can be clicked again
     plotter.add_checkbox_button_widget(partial(callback_onshape, part), position=(15,15), color_on='green')
     plotter.add_text("Export Onshape Feature Script", position=(80, 20), font_size=18)

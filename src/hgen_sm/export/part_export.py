@@ -1,10 +1,7 @@
 import os
-from dotenv import load_dotenv
 import json
 import datetime
-
-load_dotenv() # Loads variables from .env into environment
-
+import math
 
 def create_timestamp():
     now = datetime.datetime.now()
@@ -30,18 +27,17 @@ def create_part_json(part, timestamp = None):
 
     return export_data
 
-def export_to_json(part, solution_id = 0, output_dir="exports"):
+def export_to_json(part, output_dir="exports"):
     # Ensure directory exists
     os.makedirs(output_dir, exist_ok=True)
 
     # Assuming part.tabs is a dict of your tab objects
     num_tabs = len(part.tabs)
-    # Assuming number of rectangles is stored or can be calculated
     num_rects = getattr(part, 'number_rectangles', num_tabs) 
     
     timestamp = create_timestamp()
 
-    filename = f"{timestamp}_part{part.part_id}_solution{solution_id}_{num_rects}rects_{num_tabs}tabs.json"
+    filename = f"{timestamp}_part{part.part_id}_{num_rects}rects_{num_tabs}tabs.json"
     filepath = os.path.join(output_dir, filename)
 
     export_data = create_part_json(part, timestamp)    
@@ -53,47 +49,8 @@ def export_to_json(part, solution_id = 0, output_dir="exports"):
     print(f"Exported solution to: {filepath}")
     return filepath
 
-# from onshape_client.client import Client
-
-def export_to_onshape(part, solution_id = 0, output_dir="exports"):
+def export_to_onshape(part, output_dir="exports"):
     part_json = create_part_json(part)
-    convert_to_fs(part_json)
-
-
-    # API_KEY = os.getenv("ONSHAPE_API_KEY")
-    # SECRET_KEY = os.getenv("ONSHAPE_SECRET_KEY")
-
-    # # Authenticate
-    # client = Client(configuration={
-    #     "base_url": "https://cad.onshape.com",
-    #     "access_key": API_KEY,
-    #     "secret_key": SECRET_KEY
-    # })
-
-    # # Create a new document
-    # doc = client.documents_api.create_document({"name": "Generated Tabs Sheet Metal"})
-    # doc_id = doc.id
-
-    # # Get workspace ID
-    # workspaces = client.documents_api.get_document_workspaces(did=doc_id)
-    # workspace_id = workspaces[0].id
-
-    # print("Document ID:", doc_id)
-    # print("Workspace ID:", workspace_id)
-
-    # # Upload JSON file into the document
-    # with open(export_data, "rb") as f:
-    #     upload = client.blob_elements_api.upload_file_create_element(
-    #         did=doc_id,
-    #         wid=workspace_id,
-    #         file=f
-    #     )
-
-    # print("Upload result:", upload)
-
-import math
-
-def convert_to_fs(part, output_dir="exports"):
     # Vector helpers
     sub = lambda a, b: [a[i] - b[i] for i in range(3)]
     cross = lambda a, b: [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]
@@ -104,7 +61,7 @@ def convert_to_fs(part, output_dir="exports"):
     fs = [
         'FeatureScript 2837;',
         'import(path : "onshape/std/geometry.fs", version : "2837.0");',
-        'annotation { "Feature Type Name" : "hgen-sm_union_part" }',
+        'annotation { "Feature Type Name" : "hgen-sm-part" }',
         'export const jsonImport = defineFeature(function(context is Context, id is Id, definition is map)',
         '    precondition { }',
         '    {',
@@ -112,9 +69,9 @@ def convert_to_fs(part, output_dir="exports"):
     ]
     extrude_queries = []
 
-    for tab_id, tab_data in part.get("tabs", {}).items():
+    for tab_id, tab_data in part_json.get("tabs", {}).items():
         pts = list(tab_data["points"].values())
-        if len(pts) < 3: continue
+        # if len(pts) < 3: continue
 
         # --- Plane Detection & Basis Calculation ---
         p0 = pts[0]
@@ -185,10 +142,53 @@ def convert_to_fs(part, output_dir="exports"):
     os.makedirs(output_dir, exist_ok=True)
     
     timestamp = create_timestamp()
+    num_rects = len(part.tabs)
+    num_tabs = len(part.tabs)
 
-    filename = f"{timestamp}"
+    filename = f"{timestamp}_part{part.part_id}_{num_rects}rects_{num_tabs}tabs.fs"
     filepath = os.path.join(output_dir, filename)
 
     with open(filepath, 'w') as f:
         f.write("\n".join(fs))
     print(f"Done. Copy {filepath} to Onshape.")
+
+
+# from dotenv import load_dotenv
+# from onshape_client.client import Client
+# load_dotenv() # Loads variables from .env into environment
+
+# def export_to_onshape(part, solution_id = 0, output_dir="exports"):
+#     part_json = create_part_json(part)
+#     convert_to_fs(part_json)
+
+
+    # API_KEY = os.getenv("ONSHAPE_API_KEY")
+    # SECRET_KEY = os.getenv("ONSHAPE_SECRET_KEY")
+
+    # # Authenticate
+    # client = Client(configuration={
+    #     "base_url": "https://cad.onshape.com",
+    #     "access_key": API_KEY,
+    #     "secret_key": SECRET_KEY
+    # })
+
+    # # Create a new document
+    # doc = client.documents_api.create_document({"name": "Generated Tabs Sheet Metal"})
+    # doc_id = doc.id
+
+    # # Get workspace ID
+    # workspaces = client.documents_api.get_document_workspaces(did=doc_id)
+    # workspace_id = workspaces[0].id
+
+    # print("Document ID:", doc_id)
+    # print("Workspace ID:", workspace_id)
+
+    # # Upload JSON file into the document
+    # with open(export_data, "rb") as f:
+    #     upload = client.blob_elements_api.upload_file_create_element(
+    #         did=doc_id,
+    #         wid=workspace_id,
+    #         file=f
+    #     )
+
+    # print("Upload result:", upload)

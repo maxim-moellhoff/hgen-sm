@@ -4,9 +4,11 @@ exports/
 .spec
 
 # Debugging & Temporary Data
-*.pkl
+tests/
+# *.pkl
 real_part.pkl
 exports/
+*.fs
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
