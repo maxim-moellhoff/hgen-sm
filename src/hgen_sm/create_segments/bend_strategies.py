@@ -4,7 +4,7 @@ import itertools
 from config.design_rules import min_flange_length
 from src.hgen_sm.create_segments.geometry_helpers import calculate_plane, calculate_plane_intersection, create_bending_point, calculate_flange_points, next_cp
 from src.hgen_sm.create_segments.utils import line_plane_intersection, project_onto_line
-from src.hgen_sm.create_segments.filters import min_flange_width_filter, tab_fully_contains_rectangle, lines_cross, are_corners_neighbours, minimum_angle_filter
+from src.hgen_sm.filters import min_flange_width_filter, tab_fully_contains_rectangle, lines_cross, are_corners_neighbours, minimum_angle_filter, thin_segment_filter
 from src.hgen_sm.data import Bend, Tab    
 
 def one_bend(segment, filter_cfg):
@@ -334,6 +334,11 @@ def two_bends(segment, filter_cfg):
                 if not tab_fully_contains_rectangle(new_tab_x, rect_x):
                     continue
                 if not tab_fully_contains_rectangle(new_tab_z, rect_z):
+                    continue
+
+            # ---- FILTER: If section of a segment is too thin, it is probably not suitable ----
+            if filter_cfg.get('Too thin segments', False):
+                if thin_segment_filter(new_segment):
                     continue
 
             new_segment.tabs = {'tab_x':new_tab_x, 'tab_y': new_tab_y, 'tab_z': new_tab_z}

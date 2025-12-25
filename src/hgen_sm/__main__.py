@@ -42,7 +42,7 @@ def main():
         for segments_combination in itertools.product(*segments_library):
             new_part = part.copy()
             new_segments_combination = copy.deepcopy(segments_combination)
-            new_part = part_assembly(new_part, new_segments_combination)
+            new_part = part_assembly(new_part, new_segments_combination, filter_cfg)
             if new_part == None: continue
             part_id += 1
             new_part.part_id = part_id

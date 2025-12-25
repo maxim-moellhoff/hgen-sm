@@ -11,6 +11,8 @@ filter:
   Min Bend Angle: True
   Tabs cover Rects: True
   Lines Cross: True
+  Collisions: True
+  Too thin segments: True
 
 plot:
   Rectangles: True

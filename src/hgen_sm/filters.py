@@ -165,3 +165,7 @@ def _precise_poly_collision(pts1, pts2, tol):
         if poly1.intersection(poly2).area > tol:
             return True
     return False
+
+def thin_segment_filter(segment):
+    """NOT IMPLEMENTED YET: Filter out all the segments, that have sections that are too thin."""
+    return False

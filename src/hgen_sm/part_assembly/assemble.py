@@ -1,7 +1,7 @@
 from src.hgen_sm.part_assembly.merge_helpers import extract_tabs_from_segments, merge_points
-from src.hgen_sm.create_segments.filters import collision_filter
+from src.hgen_sm.filters import collision_filter
 
-def part_assembly(part, segments):
+def part_assembly(part, segments, filter_cfg):
     new_tabs_dict = {}
     flat_sequence = [] 
     for segment in segments:
@@ -35,8 +35,9 @@ def part_assembly(part, segments):
                 print("ERROR")
 
     #FILTER: Check, if any elements collide with each other
-    if collision_filter(new_tabs_dict):
-        return None
+    if filter_cfg.get("Collision", False):
+        if collision_filter(new_tabs_dict):
+            return None
 
     part.tabs = new_tabs_dict
 
