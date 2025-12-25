@@ -35,7 +35,7 @@ def part_assembly(part, segments, filter_cfg):
                 print("ERROR")
 
     #FILTER: Check, if any elements collide with each other
-    if filter_cfg.get("Collision", False):
+    if filter_cfg.get("Collisions", False):
         if collision_filter(new_tabs_dict):
             return None
 
