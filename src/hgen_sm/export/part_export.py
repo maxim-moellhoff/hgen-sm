@@ -125,7 +125,10 @@ def export_to_onshape(part, output_dir="exports"):
         fs.append(f'            "entities" : qSketchRegion(id + "sketch{tab_id}"),')
         fs.append(f'            "direction" : {fs_norm},')
         fs.append(f'            "endBound" : BoundingType.BLIND,')
-        fs.append(f'            "endDepth" : thickness')
+        fs.append(f'            "endDepth" : thickness/2,')
+        fs.append(f'            "startBound" : BoundingType.BLIND,')
+        fs.append(f'            "startDepth" : thickness/2,')
+        fs.append(f'            "oppositeDirection" : true')
         fs.append(f'        }});')
         extrude_queries.append(f'qCreatedBy(id + "extrude{tab_id}", EntityType.BODY)')
 
