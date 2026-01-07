@@ -19,6 +19,7 @@ def plot_part(part, plotter, plot_cfg, solution_idx, len_solutions):
     color_bend = "#ffb000"
     color_BP1 = "#dc267f"
     color_BP2 = "#26dc83"
+    standard_label_box_color = "#e2e2e2"
 
     if plot_cfg.get('Legend', True):
         legend_text = """
@@ -63,6 +64,7 @@ def plot_part(part, plotter, plot_cfg, solution_idx, len_solutions):
                 plotter.add_point_labels(
                         center_point,
                         [label],
+                        shape_color=standard_label_box_color,
                         font_size=standard_font_size,
                         always_visible=True,
                         show_points=False # Do not plot a visible dot at the center
@@ -96,6 +98,7 @@ def plot_part(part, plotter, plot_cfg, solution_idx, len_solutions):
                             point_coord,
                             [point_id],
                             font_size=standard_font_size,
+                            shape_color=standard_label_box_color,
                             point_size=standard_point_size,
                             show_points=False
                         )
@@ -132,7 +135,7 @@ def plot_part(part, plotter, plot_cfg, solution_idx, len_solutions):
                             opacity=0.9,
                             show_edges=True,
                             line_width=2,
-                            label=f"Flange {idx}" if tab_id == "0" else None # Avoid legend clutter
+                            # label=f"Flange {idx}" if tab_id == "0" else None # Avoid legend clutter
                         )
                     except KeyError:
                         continue # Skip if naming convention doesn't match exactly
@@ -144,22 +147,24 @@ def plot_part(part, plotter, plot_cfg, solution_idx, len_solutions):
 
 
     # --- Export Button ---
-    def callback_text(part, state):
-        if state:
-            export_to_json(part)
-            # plotter.add_checkbox_button_widget(partial(callback_text, part), value=False, position=(15, 80)) # Reset button state so it can be clicked again
-    plotter.add_checkbox_button_widget(partial(callback_text, part), position=(15,80), color_on='green')
-    plotter.add_text("Export JSON", position=(80, 85), font_size=18)
+    if plot_cfg.get('Export Buttons', True):        
+        def callback_text(part, state):
+            if state:
+                export_to_json(part)
+                # plotter.add_checkbox_button_widget(partial(callback_text, part), value=False, position=(15, 80)) # Reset button state so it can be clicked again
+        plotter.add_checkbox_button_widget(partial(callback_text, part), position=(15,80), color_on='green')
+        plotter.add_text("Export JSON", position=(80, 85), font_size=18)
 
-    def callback_onshape(part, state):
-        if state:
-            export_to_onshape(part)
-            # plotter.add_checkbox_button_widget(partial(callback_onshape, part), value=False, position=(15, 15)) # Reset button state so it can be clicked again
-    plotter.add_checkbox_button_widget(partial(callback_onshape, part), position=(15,15), color_on='green')
-    plotter.add_text("Export Onshape Feature Script", position=(80, 20), font_size=18)
+        def callback_onshape(part, state):
+            if state:
+                export_to_onshape(part)
+                # plotter.add_checkbox_button_widget(partial(callback_onshape, part), value=False, position=(15, 15)) # Reset button state so it can be clicked again
+        plotter.add_checkbox_button_widget(partial(callback_onshape, part), position=(15,15), color_on='green')
+        plotter.add_text("Export Onshape Feature Script", position=(80, 20), font_size=18)
 
     # --- Finish plot ---
-    plotter.show_grid()
+    if plot_cfg.get('Grid', True):
+        plotter.show_grid()
     plotter.render()
 
 def plot_solutions(solutions, plot_cfg, plotter=pv.Plotter()):
