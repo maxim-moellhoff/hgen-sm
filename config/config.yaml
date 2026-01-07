@@ -1,14 +1,13 @@
 topologies:
   simple_topology: true
 
-
 design_exploration:
   single_bend: True
   double_bend : True
 
 filter:
   Min Flange Width: True
-  Min Bend Angle: False
+  Min Bend Angle: True
   Tabs cover Rects: True
   Lines Cross: True
   Collisions: True
@@ -22,14 +21,10 @@ plot:
   Triangulate Tabs: True
   Corner Points: False
   
-  Labels: False   # Turn off to increase plotting speed
+  Labels: True   # Turn off to increase plotting speed
+  Legend: True
+  Grid: True
+  Export Buttons: True
 
   point_size: 30
-  font_size: 30
-  
-  BP1_color: "red"
-  BP2_color: "blue"
-  FPA1_color: "green"
-  FPA2_color: "green"
-  FPB1_color: "orange"
-  FPB2_color: "orange"
+  font_size: 40
