@@ -23,7 +23,7 @@ def one_bend(segment, filter_cfg):
     # ---- FILTER: If there is no intersection between the planes, no solution with one bend is possible
     if intersection is None: return None
 
-    # ---- FILTER: Check if the resulting bend angle would be large enough
+    # ---- RULE-FILTER: Check if the resulting bend angle would be large enough
     if not minimum_angle_filter(plane_x, plane_z): return None
 
     bend = Bend(position=intersection["position"], orientation=intersection["orientation"])
@@ -109,7 +109,6 @@ def one_bend(segment, filter_cfg):
                 continue
             if not tab_fully_contains_rectangle(new_tab_z, rect_z):
                 continue
-
             
             # ---- Update New Segment with New Tabs and add to Stack
             new_segment.tabs['tab_x'] = new_tab_x
@@ -148,6 +147,26 @@ def two_bends(segment, filter_cfg):
         CPxR_id = pair_x[1]
         CPxL = tab_x.points[CPxL_id]
         CPxR = tab_x.points[CPxR_id]
+        
+        x_pts = np.array([rect_z.points['A'], rect_z.points['B'], rect_z.points['C'], rect_z.points['D']])
+        rect_x_centroid = x_pts.mean(axis=0)
+        
+        edge_vec = CPxR - CPxL
+        edge_len = np.linalg.norm(edge_vec)
+        v1 = rect_z.points['B'] - rect_z.points['A']
+        v2 = rect_z.points['C'] - rect_z.points['A']
+        tab_normal = np.cross(v1, v2)
+        tab_normal /= np.linalg.norm(tab_normal)
+        ortho_dir = np.cross(edge_vec / edge_len, tab_normal)
+        dir_candidate1 = CPxL + ortho_dir * min_flange_length
+        dir_candidate2 = CPxL - ortho_dir * min_flange_length
+        # Choose the candidate further from the rect_x_centroid
+        if np.linalg.norm(dir_candidate1 - rect_x_centroid) > np.linalg.norm(dir_candidate2 - rect_x_centroid):
+            chosen_dir = ortho_dir
+        else:
+            chosen_dir = -ortho_dir
+        BPxL = CPxL + chosen_dir * min_flange_length
+        BPxR = CPxR + chosen_dir * min_flange_length
 
         for i, CPzM_id in enumerate(rect_z.points):
             new_segment = segment.copy()
@@ -158,11 +177,9 @@ def two_bends(segment, filter_cfg):
             CPzL = rect_z.points[CPzL_id]
             CPzR = rect_z.points[CPzR_id]
 
-            pts = np.array([rect_z.points['A'], rect_z.points['B'], rect_z.points['C'], rect_z.points['D']])
-            rect_z_centroid = pts.mean(axis=0)
-            
-            BPxL = CPxL 
-            BPxR = CPxR
+            z_pts = np.array([rect_z.points['A'], rect_z.points['B'], rect_z.points['C'], rect_z.points['D']])
+            rect_z_centroid = z_pts.mean(axis=0)
+
             bend_xy = Bend(position=BPxL, orientation=BPxR-BPxL, BPL=BPxL, BPR=BPxR)
 
             # ---- FILTER: Is flange wide enough? ----
@@ -178,24 +195,14 @@ def two_bends(segment, filter_cfg):
             projection_point = line_plane_intersection(CPxL, CPxL - CPxR, plane_z.position, plane_z.orientation)
             
             if projection_point is not None:
-                # 1. Calculate Hypotenuse (c)
                 vec_PP_CP = CPzM - projection_point
                 c = np.linalg.norm(vec_PP_CP)
                 a = min_flange_length
 
                 if c <= a:
-                    # Hypotenuse must be longer than the leg. Fallback to parallel logic.
                     projection_point = None 
                 else:
-                    # 2. Calculate Leg b (distance from PP to BPzM)
                     b = np.sqrt(c**2 - a**2)
-
-                    # 3. Find intersection of two circles in the plane of tab_z
-                    # Circle 1: Center PP, radius b
-                    # Circle 2: Center CPzM, radius a
-                    
-                    # Distance between centers is c. 
-                    # Distance from PP to the projection of BPzM onto c:
                     d = (b**2 - a**2 + c**2) / (2 * c)
                     # Height of BPzM from the line c:
                     h = np.sqrt(max(0, b**2 - d**2))
@@ -206,17 +213,14 @@ def two_bends(segment, filter_cfg):
                     v = np.cross(u, plane_z.orientation)
                     v /= np.linalg.norm(v)
 
-                    # 4. Two possible solutions for BPzM
                     sol1 = projection_point + d * u + h * v
                     sol2 = projection_point + d * u - h * v
 
-                    # 5. Select the one further from centroid
                     if np.linalg.norm(sol1 - rect_z_centroid) >= np.linalg.norm(sol2 - rect_z_centroid):
                         BPzM = sol1
                     else:
                         BPzM = sol2
 
-                    # 6. Define Bend YZ (Passes through PP and BPzM)
                     bend_yz_ori = BPzM - projection_point
                     bend_yz_ori /= np.linalg.norm(bend_yz_ori)
                     bend_yz = Bend(position=projection_point, orientation=bend_yz_ori)
@@ -252,7 +256,7 @@ def two_bends(segment, filter_cfg):
             new_tab_y = Tab(tab_id=tab_x_id + tab_z_id, points = BP_triangle)
             tab_y_id = new_tab_y.tab_id
 
-            # ---- FILTER: Is Rule minimal bend angle fullfilled?
+            # ---- RULE-FILTER: Is Rule minimal bend angle fullfilled?
             if  filter_cfg.get('Min Bend Angle', False):
                 if not minimum_angle_filter(plane_x, plane_y): continue
                 if not minimum_angle_filter(plane_y, plane_z): continue
@@ -270,10 +274,10 @@ def two_bends(segment, filter_cfg):
 
             # ---- Insert Points in Tab x----
             bend_points_x = { 
-                                # f"FP{tab_x_id}_{tab_y_id}L": FPxyL, 
+                                f"FP{tab_x_id}_{tab_y_id}L": FPxyL, 
                                 f"BP{tab_x_id}_{tab_y_id}L": BPxL, 
                                 f"BP{tab_x_id}_{tab_y_id}R": BPxR, 
-                                # f"FP{tab_x_id}_{tab_y_id}R": FPxyR
+                                f"FP{tab_x_id}_{tab_y_id}R": FPxyR
                                 }
             
             new_tab_x.insert_points(L={CPxL_id: CPxL}, add_points=bend_points_x)
