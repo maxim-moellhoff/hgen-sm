@@ -30,8 +30,15 @@
   <img src="04_4rect_14.png" alt="4 Rectangles, ID 14" width="45%"/>
 </p>
 <p align="center">
+  <img src="04_4rect_sol20.png" alt="4 Rectangles, ID sol20" width="45%"/>
   <img src="04_onshape_01.png" alt="Onshape Export 01" width="45%"/>
+</p>
+<p align="center">
   <img src="04_onshape_02.png" alt="Onshape Export 02" width="45%"/>
+  <img src="04_onshape_03.png" alt="Onshape Export 03" width="45%"/>
+</p>
+<p align="center">
+  <img src="04_onshape_04_sol20.png" alt="04_onshape_04_sol20.png" width="45%"/>
 </p>
 
 ### Version 0.3
