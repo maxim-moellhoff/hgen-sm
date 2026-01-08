@@ -119,13 +119,8 @@ def plot_part(part, plotter, plot_cfg, solution_idx, len_solutions):
             for idx, f_points in flanges.items():
                 # A valid flange needs exactly 4 points: 2 BP and 2 FP
                 if len(f_points) == 4:
-                    # Sort points to ensure a clean quadrilateral (BPL -> BPR -> FPR -> FPL)
-                    # This prevents 'bow-tie' artifacts in the mesh
-                    # ordered_keys = [f"BP{idx}L", f"BP{idx}R", f"FP{idx}R", f"FP{idx}L"]
-                    
                     try:
                         pts = np.array([f_points[k] for k in f_points])
-                        # pts = np.array(f_points)
                         faces = np.hstack([[4, 0, 1, 2, 3]])
                         flange_mesh = pv.PolyData(pts, faces)
 
