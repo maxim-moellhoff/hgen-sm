@@ -2,13 +2,18 @@ topologies:
   simple_topology: true
 
 design_exploration:
-  single_bend: True
+  single_bend: False
   double_bend : True
+
+design_rules:
+  Min Bend Angle: 40
+  Min Flange Length: 10
+  Min Flange Width: 30
 
 filter:
   Min Flange Width: True
   Min Bend Angle: True
-  Tabs cover Rects: True
+  Tabs cover Rects: False
   Lines Cross: True
   Collisions: True
   Too thin segments: False
