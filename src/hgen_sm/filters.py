@@ -15,7 +15,7 @@ def min_flange_width_filter(BPL, BPR):
         return False  # Überspringe diese Lösung
     return True
 
-def tab_fully_contains_rectangle(tab, rect, tol=1e-7):
+def tab_fully_contains_rectangle(tab, rect, tol=0.1):
     """Returns True if rectangle is fully contained in the tab"""
     tab_pts = np.array(list(tab.points.values()))
     rect_pts = np.array(list(rect.points.values()))
