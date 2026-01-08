@@ -148,16 +148,12 @@ def two_bends(segment, filter_cfg):
         CPxL = tab_x.points[CPxL_id]
         CPxR = tab_x.points[CPxR_id]
         
-        x_pts = np.array([rect_z.points['A'], rect_z.points['B'], rect_z.points['C'], rect_z.points['D']])
+        x_pts = np.array([rect_x.points['A'], rect_x.points['B'], rect_x.points['C'], rect_x.points['D']])
         rect_x_centroid = x_pts.mean(axis=0)
         
         edge_vec = CPxR - CPxL
         edge_len = np.linalg.norm(edge_vec)
-        v1 = rect_z.points['B'] - rect_z.points['A']
-        v2 = rect_z.points['C'] - rect_z.points['A']
-        tab_normal = np.cross(v1, v2)
-        tab_normal /= np.linalg.norm(tab_normal)
-        ortho_dir = np.cross(edge_vec / edge_len, tab_normal)
+        ortho_dir = np.cross(edge_vec / edge_len, plane_x.orientation)
         dir_candidate1 = CPxL + ortho_dir * min_flange_length
         dir_candidate2 = CPxL - ortho_dir * min_flange_length
         # Choose the candidate further from the rect_x_centroid
@@ -167,6 +163,7 @@ def two_bends(segment, filter_cfg):
             chosen_dir = -ortho_dir
         BPxL = CPxL + chosen_dir * min_flange_length
         BPxR = CPxR + chosen_dir * min_flange_length
+        bend_xy = Bend(position=BPxL, orientation=BPxR-BPxL, BPL=BPxL, BPR=BPxR)
 
         for i, CPzM_id in enumerate(rect_z.points):
             new_segment = segment.copy()
@@ -180,8 +177,6 @@ def two_bends(segment, filter_cfg):
             z_pts = np.array([rect_z.points['A'], rect_z.points['B'], rect_z.points['C'], rect_z.points['D']])
             rect_z_centroid = z_pts.mean(axis=0)
 
-            bend_xy = Bend(position=BPxL, orientation=BPxR-BPxL, BPL=BPxL, BPR=BPxR)
-
             # ---- FILTER: Is flange wide enough? ----
             if not min_flange_width_filter(BPL=BPxL, BPR=BPxR) and filter_cfg.get('Min Flange Width', False):
                 continue
@@ -192,8 +187,7 @@ def two_bends(segment, filter_cfg):
             new_tab_z = new_segment.tabs['tab_z']
 
             # ---- Determine BPzM by projecting on the CPzM, line_plane_intersection, BPzM triangle in min_flange_length direction
-            projection_point = line_plane_intersection(CPxL, CPxL - CPxR, plane_z.position, plane_z.orientation)
-            
+            projection_point = line_plane_intersection(BPxL, BPxL - BPxR, plane_z.position, plane_z.orientation)
             if projection_point is not None:
                 vec_PP_CP = CPzM - projection_point
                 c = np.linalg.norm(vec_PP_CP)
@@ -241,18 +235,12 @@ def two_bends(segment, filter_cfg):
                 bend_yz = Bend(position=bend_yz_pos, orientation=bend_yz_ori)
                 BPzM = bend_yz.position
 
-                # new_tab_z.remove_point(point={CPzM_id: CPzM})
-
-
             BPzL = project_onto_line(CPzL, bend_yz.position, bend_yz.orientation)
             BPzR = project_onto_line(CPzR, bend_yz.position, bend_yz.orientation)
 
             BP_triangle = {"A": BPxL, "B": BPxR, "C": BPzM}
             plane_y = calculate_plane(triangle=BP_triangle)
 
-
-            
-            
             new_tab_y = Tab(tab_id=tab_x_id + tab_z_id, points = BP_triangle)
             tab_y_id = new_tab_y.tab_id
 
@@ -301,36 +289,34 @@ def two_bends(segment, filter_cfg):
                                     f"BP{tab_y_id}_{tab_x_id}R": BPxR, 
                                     f"FP{tab_y_id}_{tab_x_id}R": FPyxR,
                                     f"FP{tab_y_id}_{tab_z_id}R": FPyzR,
-                                    f"BP{tab_y_id}_{tab_z_id}R": BPzR, 
-                                    f"BP{tab_y_id}_{tab_z_id}L": BPzL, 
+                                    f"BP{tab_y_id}_{tab_z_id}R": BPzR,
+                                    f"BP{tab_y_id}_{tab_z_id}L": BPzL,
                                     f"FP{tab_y_id}_{tab_z_id}L": FPyzL 
-                                    
                                     }
             new_tab_y.points = bend_points_y
             
             # ---- Insert Points in Tab z ----
-            if lines_cross(FPyzL, CPzL, CPzR, FPyxR):
-                bend_points_z = { 
-                                    f"FP{tab_z_id}_{tab_y_id}R": FPzyR,
-                                    f"BP{tab_z_id}_{tab_y_id}R": BPzR, 
-                                    f"BP{tab_z_id}_{tab_y_id}L": BPzL, 
-                                    f"FP{tab_z_id}_{tab_y_id}L": FPzyL
-                                    }
+            # if lines_cross(FPyzL, CPzL, CPzR, FPyxR):
+            #     bend_points_z = { 
+            #                         f"FP{tab_z_id}_{tab_y_id}R": FPzyR,
+            #                         f"BP{tab_z_id}_{tab_y_id}R": BPzR, 
+            #                         f"BP{tab_z_id}_{tab_y_id}L": BPzL, 
+            #                         f"FP{tab_z_id}_{tab_y_id}L": FPzyL
+            #                         }
                 
-            else:
-                bend_points_z = { 
-                                    f"FP{tab_z_id}_{tab_y_id}L": FPzyL, 
-                                    f"BP{tab_z_id}_{tab_y_id}L": BPzL, 
-                                    f"BP{tab_z_id}_{tab_y_id}R": BPzR, 
-                                    f"FP{tab_z_id}_{tab_y_id}R": FPzyR
-                                    }
+            # else:
+            bend_points_z = { 
+                                f"FP{tab_z_id}_{tab_y_id}L": FPzyL, 
+                                f"BP{tab_z_id}_{tab_y_id}L": BPzL, 
+                                f"BP{tab_z_id}_{tab_y_id}R": BPzR, 
+                                f"FP{tab_z_id}_{tab_y_id}R": FPzyR
+                                }
             if CPzM_id not in new_tab_z.points.keys():    
                 new_tab_z.insert_points(L={CPzL_id: CPzL}, add_points=bend_points_z)
             elif (CPzM == list(bend_points_z.values())[0]).all(): 
                 new_tab_z.insert_points(L={CPzM_id: CPzM}, add_points=bend_points_z)
-            else:#elif (CPzR == list(bend_points_z.values())[1]).all():
+            else:
                 new_tab_z.insert_points(L={CPzL_id: CPzL}, add_points=bend_points_z)
-
 
 
             # ---- FILTER: Do Tabs cover Rects fully? ----
