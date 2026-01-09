@@ -47,8 +47,6 @@ def main():
             part_id += 1
             new_part.part_id = part_id
             solutions.append(new_part)
-            if len(solutions[0].tabs['1'].points) > 14:
-                print("ERROR")
 
     print("--- %s seconds ---" % (time.time() - start_time))
     print(f"Found {len(solutions)} solutions")

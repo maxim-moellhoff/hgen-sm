@@ -111,8 +111,6 @@ def merge_points(points) -> Optional[Dict[str, np.ndarray]]:
         elif point_id in geom_b:
             final_geometry[point_id] = geom_b[point_id]
         
-    if len(final_geometry) > 12:
-        print(final_geometry)
     return final_geometry
 
 

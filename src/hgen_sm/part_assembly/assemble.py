@@ -32,8 +32,6 @@ def part_assembly(part, segments, filter_cfg):
             if new_points == None:
                 return None
             new_tabs_dict[tab_id].points = new_points
-            if len(new_tabs_dict[tab_id].points) > 12:
-                print("ERROR")
 
     #FILTER: Check, if any elements collide with each other
     if filter_cfg.get("Collisions", False):
