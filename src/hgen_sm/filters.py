@@ -15,7 +15,7 @@ def min_flange_width_filter(BPL, BPR):
         return False  # Überspringe diese Lösung
     return True
 
-def tab_fully_contains_rectangle(tab, rect, tol=0.1):
+def tab_fully_contains_rectangle(tab, rect, tol=1e-7):
     """Returns True if rectangle is fully contained in the tab"""
     tab_pts = np.array(list(tab.points.values()))
     rect_pts = np.array(list(rect.points.values()))
@@ -58,41 +58,79 @@ def tab_fully_contains_rectangle(tab, rect, tol=0.1):
 import numpy as np
 
 def lines_cross(P1, P2, P3, P4, buffer=0.1):
+    # 1. Bounding Box check (Crucial for performance/sensitivity)
+    def get_bounds(a, b):
+        return np.minimum(a, b), np.maximum(a, b)
+    
+    min1, max1 = get_bounds(P1, P2)
+    min2, max2 = get_bounds(P3, P4)
+    
+    # If boxes don't overlap with buffer, no need to check further
+    if np.any(min1 > max2 + buffer) or np.any(min2 > max1 + buffer):
+        return False
+
+    # 2. Shortest distance between two 3D segments
+    # This is the most sensitive metric possible.
+    dist = _dist_segment_to_segment_3d(P1, P2, P3, P4)
+    
+    return dist < buffer
+
+def _dist_segment_to_segment_3d(p1, p2, p3, p4):
     """
-    Checks if segments P1-P2 and P3-P4 intersect or come within 'buffer' distance.
+    Calculates the absolute minimum distance between two 3D line segments.
     """
-    p1, p2, p3, p4 = P1[:2], P2[:2], P3[:2], P4[:2]
+    u = p2 - p1
+    v = p4 - p3
+    w = p1 - p3
+    a = np.dot(u, u)
+    b = np.dot(u, v)
+    c = np.dot(v, v)
+    d = np.dot(u, w)
+    e = np.dot(v, w)
+    D = a * c - b * b
+    
+    sc, sN, sD = D, D, D
+    tc, tN, tD = D, D, D
 
-    def dist_segment_to_segment(a, b, c, d):
-        # Helper to find the minimum distance between two 2D segments
-        # This is the most robust way to implement a physical buffer
-        def dist_pt_to_seg(p, s1, s2):
-            l2 = np.sum((s1 - s2)**2)
-            if l2 == 0: return np.linalg.norm(p - s1)
-            t = max(0, min(1, np.dot(p - s1, s2 - s1) / l2))
-            projection = s1 + t * (s2 - s1)
-            return np.linalg.norm(p - projection)
+    # Compute the line parameters of the two closest points
+    if D < 1e-8: # Lines are parallel
+        sN = 0.0
+        sD = 1.0
+        tN = e
+        tD = c
+    else:
+        sN = (b * e - c * d)
+        tN = (a * e - b * d)
+        if sN < 0.0:
+            sN = 0.0
+            tN = e
+            tD = c
+        elif sN > sD:
+            sN = sD
+            tN = e + b
+            tD = c
 
-        return min(
-            dist_pt_to_seg(a, c, d),
-            dist_pt_to_seg(b, c, d),
-            dist_pt_to_seg(c, a, b),
-            dist_pt_to_seg(d, a, b)
-        )
+    if tN < 0.0:
+        tN = 0.0
+        if -d < 0.0: sN = 0.0
+        elif -d > a: sN = sD
+        else:
+            sN = -d
+            sD = a
+    elif tN > tD:
+        tN = tD
+        if (-d + b) < 0.0: sN = 0
+        elif (-d + b) > a: sN = sD
+        else:
+            sN = (-d + b)
+            sD = a
 
-    # 1. Standard intersection check (Cross Product)
-    def cp_2d(a, b, c):
-        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    sc = 0.0 if abs(sN) < 1e-8 else sN / sD
+    tc = 0.0 if abs(tN) < 1e-8 else tN / tD
 
-    o1, o2 = cp_2d(p1, p2, p3), cp_2d(p1, p2, p4)
-    o3, o4 = cp_2d(p3, p4, p1), cp_2d(p3, p4, p2)
-
-    # If they mathematically intersect
-    if (o1 * o2 < 0) and (o3 * o4 < 0):
-        return True
-
-    # 2. Buffer check: Are they closer than the allowed distance?
-    return dist_segment_to_segment(p1, p2, p3, p4) < buffer
+    # Closest vector
+    closest_vec = w + (sc * u) - (tc * v)
+    return np.linalg.norm(closest_vec)
 
 def are_corners_neighbours(cp_id1: str, cp_id2: str) -> bool:
     """Checks if two corner IDs are adjacent on the perimeter of the rectangle."""
