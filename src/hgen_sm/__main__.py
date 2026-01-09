@@ -30,6 +30,7 @@ def main():
     for sequence in sequences:
         segments_library = []
         for pair in sequence:
+            if part.tabs.get(pair[0]) is None or part.tabs.get(pair[1]) is None: continue
             tab_x = part.tabs[pair[0]]
             tab_z = part.tabs[pair[1]]
             segment_tabs = {'tab_x': tab_x, 'tab_z': tab_z}
