@@ -18,7 +18,7 @@ def determine_sequences(part, cfg):
         sequences.append(pair_sequence)
 
     if topo_cfg.get('Specific Topology', False):
-        pair_sequence = [['0', '1'], ['0', '3'], ['0', '2']]
+        pair_sequence = [['0', '1'], ['0', '2'], ['0', '3'], ['3', '4'], ['3', '5'], ]
         sequences.append(pair_sequence)
 
     return sequences
