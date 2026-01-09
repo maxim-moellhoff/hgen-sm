@@ -12,18 +12,21 @@ def extract_tabs_from_segments(tab_id, segments):
     return tabs
 
 
-def merge_points(tabs: List[Any]) -> Optional[Dict[str, np.ndarray]]:
+def merge_points(points) -> Optional[Dict[str, np.ndarray]]:
     """
     Merges ordered tab geometry based on synchronization points (A, B, C, D).
     Fails if both tabs simultaneously introduce different non-standard points.
     """
-    if len(tabs) != 2:
-        return None
+    if len(points) > 2:
+        second_pair = merge_points([points[1], points[2]])
+        if second_pair == None: return None
+        points[1] = second_pair
+
 
     # Constants and Initialization
     STD_PTS: Set[str] = {'A', 'B', 'C', 'D'}
-    geom_a: Dict[str, np.ndarray] = tabs[0].points
-    geom_b: Dict[str, np.ndarray] = tabs[1].points
+    geom_a: Dict[str, np.ndarray] = points[0]
+    geom_b: Dict[str, np.ndarray] = points[1]
 
     ids_a: List[str] = list(geom_a.keys())
     ids_b: List[str] = list(geom_b.keys())
@@ -111,3 +114,10 @@ def merge_points(tabs: List[Any]) -> Optional[Dict[str, np.ndarray]]:
     if len(final_geometry) > 12:
         print(final_geometry)
     return final_geometry
+
+
+def extract_points_from_tabs(tabs):
+    points = []
+    for tab in tabs:
+        points.append(tab.points)
+    return points

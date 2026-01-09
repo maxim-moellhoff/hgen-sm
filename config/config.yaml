@@ -7,7 +7,7 @@ design_exploration:
   double_bend : True
 
 design_rules:
-  Min Bend Angle: 40
+  Min Bend Angle: 35
   Min Flange Length: 10
   Min Flange Width: 30
 

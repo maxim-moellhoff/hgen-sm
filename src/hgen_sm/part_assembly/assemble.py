@@ -1,4 +1,4 @@
-from src.hgen_sm.part_assembly.merge_helpers import extract_tabs_from_segments, merge_points
+from src.hgen_sm.part_assembly.merge_helpers import extract_tabs_from_segments, merge_points, extract_points_from_tabs
 from src.hgen_sm.filters import collision_filter
 
 def part_assembly(part, segments, filter_cfg):
@@ -27,7 +27,8 @@ def part_assembly(part, segments, filter_cfg):
         # if a tab appears twice, grab the values from segments, try to merge them. If it fails, skip entirely
         if count > 1:
             tabs = extract_tabs_from_segments(tab_id, segments)
-            new_points = merge_points(tabs)
+            points = extract_points_from_tabs(tabs)
+            new_points = merge_points(points)
             if new_points == None:
                 return None
             new_tabs_dict[tab_id].points = new_points
