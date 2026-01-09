@@ -157,6 +157,12 @@ def plot_part(part, plotter, plot_cfg, solution_idx, len_solutions):
         plotter.add_checkbox_button_widget(partial(callback_onshape, part), position=(15,15), color_on='green')
         plotter.add_text("Export Onshape Feature Script", position=(80, 20), font_size=18)
 
+        # def callback_save_graphic(state):
+        #     if state:
+        #         plotter.save_graphic('exports/hgen-sm_part.svg')
+        # plotter.add_checkbox_button_widget(callback_save_graphic, position=(15, 145), color_on='green')
+        # plotter.add_text("Save Graphic", position=(80, 150))
+
     # --- Finish plot ---
     if plot_cfg.get('Grid', True):
         plotter.show_grid()
