@@ -4,13 +4,13 @@
 </p>
 
 <p align="center">
-  <img src="assets/images/04_4rect_10.png" alt="Screenshot 3" width="45%"/>
-  <img src="assets/images/04_4rect_11.png" alt="Screenshot 4" width="45%"/>
+  <img src="assets/images/04_6rect_complex_combination.png" alt="Screenshot 3" width="45%"/>
+  <img src="assets/images/04_4rect_sol20.png" alt="Screenshot 4" width="45%"/>
 </p>
 
 <p align="center">
   <img src="assets/images/04_onshape_01.png" alt="Screenshot 1" width="45%"/>
-  <img src="assets/images/04_onshape_02.png" alt="Screenshot 2" width="34%"/>
+  <img src="assets/images/04_onshape_04_sol20.png" alt="Screenshot 2" width="34%"/>
 </p>
 
 # How it works
