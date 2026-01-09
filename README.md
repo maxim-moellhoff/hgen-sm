@@ -54,7 +54,8 @@ In config.yaml you can configure what should get plotted.
 	- [x] Filter solutions that are unsuitable
 	- [x] Improve flange visuals
 	- [x] Introduce collision filter
-	- [ ] Improve angle filter
+	- [x] Improve angle filter
+	- [x] Introduce more complex sequences
 	- [ ] Introduce mounts
 	- [ ] Introduce rule "Minimum distance mount from bend"
 	- [ ] Generate solutions by separating surfaces
