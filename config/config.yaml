@@ -1,8 +1,9 @@
 topologies:
-  simple_topology: true
+  Simple Topology: False
+  Specific Topology: True #Edit sequence in src/hgen_sm/determine_sequences/choose_pairs.py
 
 design_exploration:
-  single_bend: False
+  single_bend: True
   double_bend : True
 
 design_rules:
@@ -13,9 +14,9 @@ design_rules:
 filter:
   Min Flange Width: True
   Min Bend Angle: True
-  Tabs cover Rects: False
+  Tabs cover Rects: True
   Lines Cross: True
-  Collisions: True
+  Collisions: True 
   Too thin segments: False
 
 plot:
@@ -26,7 +27,7 @@ plot:
   Triangulate Tabs: True
   Corner Points: False
   
-  Labels: True   # Turn off to increase plotting speed
+  Labels: False   # Turn off to increase plotting speed
   Legend: True
   Grid: True
   Export Buttons: True
