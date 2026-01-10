@@ -170,5 +170,5 @@ table_w_legs = [
 
 table_w_legs_sequence = [['0', '1'], ['0', '2'], ['0', '3'], ['3', '4'], ['3', '5'], ]
 
-RECTANGLE_INPUTS = same_plane
+RECTANGLE_INPUTS = A
 CUSTOM_SEQUENCE = None
