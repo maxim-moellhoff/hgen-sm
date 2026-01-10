@@ -1,5 +1,5 @@
 topologies:
-  Simple Topology: False
+  Simple Topology: True
   Specific Topology: True #Edit sequence in src/hgen_sm/determine_sequences/choose_pairs.py
 
 design_exploration:
@@ -27,7 +27,7 @@ plot:
   Triangulate Tabs: True
   Corner Points: False
   
-  Labels: False   # Turn off to increase plotting speed
+  Labels: True   # Turn off to increase plotting speed
   Legend: True
   Grid: True
   Export Buttons: True

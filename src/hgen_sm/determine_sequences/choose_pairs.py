@@ -1,4 +1,5 @@
 from typing import List
+from config.user_input import CUSTOM_SEQUENCE
 
 def determine_sequences(part, cfg):
 
@@ -17,8 +18,8 @@ def determine_sequences(part, cfg):
             pair_sequence.append(pair)
         sequences.append(pair_sequence)
 
-    if topo_cfg.get('Specific Topology', False):
-        pair_sequence = [['0', '1'], ['0', '2'], ['0', '3'], ['3', '4'], ['3', '5'], ]
+    if topo_cfg.get('Specific Topology', False) and CUSTOM_SEQUENCE is not None:
+        pair_sequence = CUSTOM_SEQUENCE
         sequences.append(pair_sequence)
 
     return sequences
