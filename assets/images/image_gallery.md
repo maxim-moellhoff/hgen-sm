@@ -1,5 +1,11 @@
 # Image Gallery
 
+### Version 0.4.1
+<p align="center">
+  <img src="260110_1256_part12_10rects_10tabs.png" alt="260110_1256_part12_10rects_10tabs.png" width="45%"/>
+  <img src="260110_1256_part12_10rects_10tabs_onshape.png" alt="260110_1256_part12_10rects_10tabs_onshape.png" width="45%"/>
+</p>
+
 ### Version 0.4
 <p align="center">
   <img src="04_3rect_01.png" alt="3 Rectangles, ID 01" width="45%"/>
@@ -31,13 +37,14 @@
 </p>
 <p align="center">
   <img src="04_4rect_sol20.png" alt="4 Rectangles, ID sol20" width="45%"/>
+  <img src="04_6rect_complex_combination.png" alt="04_6rect_complex_combination.png" width="45%"/>
+</p>
+<p align="center">
   <img src="04_onshape_01.png" alt="Onshape Export 01" width="45%"/>
-</p>
-<p align="center">
   <img src="04_onshape_02.png" alt="Onshape Export 02" width="45%"/>
-  <img src="04_onshape_03.png" alt="Onshape Export 03" width="45%"/>
 </p>
 <p align="center">
+  <img src="04_onshape_03.png" alt="Onshape Export 03" width="45%"/>
   <img src="04_onshape_04_sol20.png" alt="04_onshape_04_sol20.png" width="45%"/>
 </p>
 
