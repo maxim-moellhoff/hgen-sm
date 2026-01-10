@@ -1,17 +1,18 @@
 <p align="center">
-  <img src="assets/images/04_4rect_13.png" alt="Screenshot 3" width="45%"/>
-  <img src="assets/images/04_4rect_14.png" alt="Screenshot 4" width="45%"/>
-</p>
-
-<p align="center">
   <img src="assets/images/04_6rect_complex_combination.png" alt="Screenshot 3" width="45%"/>
-  <img src="assets/images/04_4rect_sol20.png" alt="Screenshot 4" width="45%"/>
+  <img src="assets/images/04_4rect_13.png" alt="Screenshot 4" width="45%"/>
 </p>
 
 <p align="center">
   <img src="assets/images/04_onshape_01.png" alt="Screenshot 1" width="45%"/>
   <img src="assets/images/04_onshape_04_sol20.png" alt="Screenshot 2" width="34%"/>
 </p>
+
+<p align="center">
+  <img src="assets/images/260110_1256_part12_10rects_10tabs.png" alt="Screenshot 3" width="45%"/>
+  <img src="assets/images/260110_1256_part12_10rects_10tabs_onshape.png" alt="Screenshot 4" width="45%"/>
+</p>
+
 
 # How it works
 The user gives two rectangles as an input, and the program tries to find different ways to connect those two rectangles in way, that is manufacturable. Solutions are generated in two ways. Either by finding the intersection of the two planes and connecting them, or by selecting 2 points from one rectangle and 1 point from the other, and creating an additional tab on that plane.

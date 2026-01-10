@@ -92,3 +92,21 @@ def line_plane_intersection(
 
 def project_onto_line(pt, line_pos, line_ori):
                 return line_pos + np.dot(pt - line_pos, line_ori) * line_ori
+
+def are_planes_same(plane1, plane2, tol=1e-6):
+    # 1. Check if orientations are parallel
+    # Use absolute dot product to handle flipped normals (e.g., [0,0,1] vs [0,0,-1])
+    n1 = plane1.orientation / np.linalg.norm(plane1.orientation)
+    n2 = plane2.orientation / np.linalg.norm(plane2.orientation)
+    
+    if not np.isclose(abs(np.dot(n1, n2)), 1.0, atol=tol):
+        return False
+
+    # 2. Check if plane2's position lies on plane1
+    # The vector from P1 to P2 must be perpendicular to the normal
+    v_diff = plane2.position - plane1.position
+    
+    # If the distance between the planes along the normal is ~0
+    distance_to_plane = abs(np.dot(v_diff, n1))
+    
+    return distance_to_plane < tol

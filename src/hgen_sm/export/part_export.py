@@ -74,18 +74,26 @@ def export_to_onshape(part, output_dir="exports"):
         pts = list(tab_data["points"].values())
         if len(pts) < 3: continue
 
-        # --- Plane Detection & Basis Calculation ---
         p0 = pts[0]
-        v1 = sub(pts[1], p0)
+        v1 = None
         
-        # FIX: Find a point that is NOT collinear with p0 and p1 to determine normal
+        # 1. Find the first point different from p0 to create v1
+        for i in range(1, len(pts)):
+            diff = sub(pts[i], p0)
+            if mag_sq(diff) > 1e-8:
+                v1 = diff
+                start_idx = i + 1
+                break
+        
+        if v1 is None: continue # All points are the same
+
+        # 2. Find a point that is not collinear with v1
         z_axis = [0, 0, 1]
         valid_plane_found = False
         
-        for i in range(2, len(pts)):
+        for i in range(start_idx, len(pts)):
             v_temp = sub(pts[i], p0)
             cp = cross(v1, v_temp)
-            # Check if cross product magnitude is sufficient (not collinear)
             if mag_sq(cp) > 1e-8: 
                 z_axis = norm(cp)
                 valid_plane_found = True

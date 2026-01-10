@@ -95,12 +95,12 @@ same_plane = [
     {
         'pointA': [0, 0, 0],
         'pointB': [50, 0, 0],
-        'pointC': [50, 50, 0]
+        'pointC': [50, 50, 0],
     },
     {
-        'pointA': [150, 0, 0],
-        'pointB': [20, 0, 0],
-        'pointC': [20, 50, 0]
+        'pointA': [150, 60, 0],
+        'pointB': [100, 60, 0],
+        'pointC': [100, 0, 0],
     }
 ]
 
@@ -141,34 +141,34 @@ table_w_legs = [
         'pointB': [10, 30, 50],
         'pointC': [50, 30, 50]
     },
-    # {
-    #     'pointA': [10, -50, 0],
-    #     'pointB': [10, -100, 0],
-    #     'pointC': [50, -100, 0]
-    # },
-    # {
-    #     'pointA': [10, 80, 0],
-    #     'pointB': [10, 130, 0],
-    #     'pointC': [50, 130, 0]
-    # },
+    {
+        'pointA': [10, -50, 0],
+        'pointB': [10, -100, 0],
+        'pointC': [50, -100, 0]
+    },
+    {
+        'pointA': [10, 80, 0],
+        'pointB': [10, 130, 0],
+        'pointC': [50, 130, 0]
+    },
     {
         'pointA': [100, 0, 50],
         'pointB': [100, 30, 50],
         'pointC': [130, 30, 50]
     },
-    # {
-    #     'pointA': [100, -50, 0],
-    #     'pointB': [100, -100, 0],
-    #     'pointC': [130, -100, 0]
-    # },
-    # {
-    #     'pointA': [100, 80, 0],
-    #     'pointB': [100, 130, 0],
-    #     'pointC': [130, 130, 0]
-    # },
+    {
+        'pointA': [100, -50, 0],
+        'pointB': [100, -100, 0],
+        'pointC': [130, -100, 0]
+    },
+    {
+        'pointA': [100, 80, 0],
+        'pointB': [100, 130, 0],
+        'pointC': [130, 130, 0]
+    },
 ]
 
 table_w_legs_sequence = [['0', '1'], ['0', '2'], ['0', '3'], ['3', '4'], ['3', '5'], ]
 
-RECTANGLE_INPUTS = A
-CUSTOM_SEQUENCE = None
+RECTANGLE_INPUTS = table_w_legs
+CUSTOM_SEQUENCE = table_w_legs_sequence # REplace with "None", if no custom sequence is needed 

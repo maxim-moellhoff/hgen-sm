@@ -3,9 +3,128 @@ import itertools
 
 from config.design_rules import min_flange_length
 from src.hgen_sm.create_segments.geometry_helpers import calculate_plane, calculate_plane_intersection, create_bending_point, calculate_flange_points, next_cp
-from src.hgen_sm.create_segments.utils import line_plane_intersection, project_onto_line
+from src.hgen_sm.create_segments.utils import line_plane_intersection, project_onto_line, are_planes_same
 from src.hgen_sm.filters import min_flange_width_filter, tab_fully_contains_rectangle, lines_cross, are_corners_neighbours, minimum_angle_filter, thin_segment_filter
 from src.hgen_sm.data import Bend, Tab    
+
+def connect_tab_same_plane(segment, filter_cfg, tab_x, tab_z):
+    rect_x = tab_x.rectangle
+    rect_z = tab_z.rectangle
+
+    max_dist = -1.0
+    furthest_CP_x = None
+    furthest_CP_z = None
+
+    for id_x, p_x in tab_x.points.items():
+        for id_z, p_z in tab_z.points.items():
+            dist = np.linalg.norm(p_x - p_z)
+            if dist > max_dist:
+                max_dist = dist
+                furthest_CP_x = id_x
+                furthest_CP_z = id_z
+
+    # rect_x_combinations = list(itertools.permutations(rect_x.points, 2))
+    rect_combinations = [
+        ('A', 'B'),
+        ('A', 'C'),
+        ('B', 'C'),
+        ('B', 'D'),
+        ('C', 'D'),
+        # ('C', 'A'),
+        ('A', 'D'),
+        # ('D', 'B'),
+    ]
+    # rect_z_combinations = list(itertools.permutations(rect_z.points, 2))
+
+    segment_library = []
+    for pair_x in rect_combinations:
+        CP_xL_id = pair_x[0]
+        CP_xL = tab_x.points[CP_xL_id]
+        CP_xR_id = pair_x[1]
+        CP_xR = tab_x.points[CP_xR_id]
+
+        if CP_xL_id == furthest_CP_x or CP_xR_id == furthest_CP_x:
+                continue
+        
+        for pair_z in rect_combinations:
+            CP_zL_id = pair_z[0]
+            CP_zL = tab_z.points[CP_zL_id]
+            CP_zR_id = pair_z[1]
+            CP_zR = tab_z.points[CP_zR_id]
+
+            if CP_zL_id == furthest_CP_z or CP_zR_id == furthest_CP_z:
+                continue
+
+            if lines_cross(CP_xL, CP_zL, CP_xR, CP_zR):
+                mid_L = (CP_xL + CP_zR) / 2
+                mid_R = (CP_xR + CP_zL) / 2
+            else:
+                mid_L = (CP_xL + CP_zL) / 2
+                mid_R = (CP_xR + CP_zR) / 2
+
+            # ---- Check Crossover
+            # if filter_cfg.get('Lines Cross', True):
+            #     if lines_cross(CP_zL, mid_L, CP_zR, mid_R) or lines_cross(CP_xL, mid_L, CP_xR, mid_R):
+            #         continue
+
+            # ---- Update Segment.tabs ----
+            new_segment = segment.copy()
+            new_tab_x = new_segment.tabs['tab_x']
+            new_tab_z = new_segment.tabs['tab_z']
+
+            # ---- Insert Points in Tab x ----
+            CPL = {CP_xL_id: CP_xL}
+            if lines_cross(CP_xL, mid_L, CP_xR, mid_R):
+                bend_points_x = { 
+                                    f"midR": mid_R,
+                                    f"midL": mid_L, 
+                                    }
+            else:
+                bend_points_x = { 
+                                    f"midL": mid_L, 
+                                    f"midR": mid_R,
+                                    }
+
+            
+            new_tab_x.insert_points(L=CPL, add_points=bend_points_x)
+
+            # ---- Insert Points in Tab z ----
+            CPL = {CP_zL_id: CP_zL}
+            if lines_cross(CP_zL, mid_L, CP_zR, mid_R):
+                bend_points_z = { 
+                                    f"midR": mid_R,
+                                    f"midL": mid_L, 
+                                    }
+            else:
+                bend_points_z = { 
+                                    f"midL": mid_L, 
+                                    f"midR": mid_R,
+                                    }
+            
+            new_tab_z.insert_points(L=CPL, add_points=bend_points_z)
+            
+            if not are_corners_neighbours(CP_xL_id, CP_xR_id):
+                rm_point_id = next_cp(new_tab_x.rectangle.points, CP_xL_id)
+                rm_point = new_tab_x.rectangle.points[rm_point_id]
+                new_tab_x.remove_point(point={rm_point_id: rm_point})
+            
+            if not are_corners_neighbours(CP_zL_id, CP_zR_id):
+                rm_point_id = next_cp(new_tab_z.rectangle.points, CP_zL_id)
+                rm_point = new_tab_z.rectangle.points[rm_point_id]
+                new_tab_z.remove_point(point={rm_point_id: rm_point})
+            
+            # ---- FILTER: Do Tabs cover Rects fully? ----
+            if not tab_fully_contains_rectangle(new_tab_x, rect_x):
+                continue
+            if not tab_fully_contains_rectangle(new_tab_z, rect_z):
+                continue
+            
+            # ---- Update New Segment with New Tabs and add to Stack
+            new_segment.tabs['tab_x'] = new_tab_x
+            new_segment.tabs['tab_z'] = new_tab_z
+            segment_library.append(new_segment)
+
+    return segment_library
 
 def one_bend(segment, filter_cfg):
     tab_x = segment.tabs['tab_x']
@@ -19,6 +138,10 @@ def one_bend(segment, filter_cfg):
     plane_x = calculate_plane(rect_x)
     plane_z = calculate_plane(rect_z)
     intersection = calculate_plane_intersection(plane_x, plane_z)
+
+    # ---- If tabs share plane, they can be connected directly
+    if are_planes_same(plane_x, plane_z):
+        return connect_tab_same_plane(segment, filter_cfg, tab_x, tab_z)
     
     # ---- FILTER: If there is no intersection between the planes, no solution with one bend is possible
     if intersection is None: return None
@@ -42,7 +165,8 @@ def one_bend(segment, filter_cfg):
             CP_zL_id = pair_z[0]
             CP_zL = tab_z.points[CP_zL_id]
             CP_zR_id = pair_z[1]
-            CP_zR = tab_z.points[CP_zR_id]
+            CP_zR = tab_z.points[CP_zR_id]   
+
             
             # ---- Bending Points ----
             BPL = create_bending_point(CP_xL, CP_zL, bend)
@@ -128,6 +252,9 @@ def two_bends(segment, filter_cfg):
 
     plane_x = calculate_plane(rect_x)
     plane_z = calculate_plane(rect_z)
+
+    if are_planes_same(plane_x, plane_z):
+        return None
 
     # rect_x_combinations = list(itertools.permutations(rect_x.points, 2))
     rect_x_combinations = [

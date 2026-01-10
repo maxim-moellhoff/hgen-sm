@@ -9,6 +9,8 @@ def create_segments(segment, segment_cfg, filter_cfg):
             segment_library.extend(new_segments)
 
     if segment_cfg.get('double_bend', True):
-        segment_library.extend(two_bends(segment, filter_cfg))
+        new_segments = two_bends(segment, filter_cfg)
+        if new_segments is not None:
+            segment_library.extend(new_segments)
 
     return segment_library
