@@ -1,5 +1,31 @@
 # Image Gallery
 
+### Version 0.4.2
+<p align="center">
+  <img src="val_barda_normal_hgen.png" alt="val_barda_normal_hgen.png" width="45%"/>
+  <img src="val_barda_onsh_hgen.png" alt="val_barda_onsh_hgen.png" width="45%"/>
+</p>
+<p align="center">
+  <img src="val_barda_onsh_hgen_flat.png" alt="val_barda_onsh_hgen_flat.png" width="45%"/>
+  <img src="val_barda_reverse_hgen.png" alt="val_barda_reverse_hgen.png" width="45%"/>
+</p>
+<p align="center">
+  <img src="val_campbell_crazy.png" alt=" Bend, ID crazy" width="45%"/>
+  <img src="val_campbell_normal.png" alt=" Bend, ID normal" width="45%"/>
+</p>
+<p align="center">
+  <img src="val_ex_acry_left_side.png" alt="val_ex_acry_left_side.png" width="45%"/>
+  <img src="val_ex_acry_normal.png" alt="val_ex_acry_normal.png" width="45%"/>
+</p>
+<p align="center">
+  <img src="val_ex_acry_top.png" alt="val_ex_acry_top.png" width="45%"/>
+  <img src="val_rust_doublebend.png" alt=" Bend, ID doublebend" width="45%"/>
+</p>
+<p align="center">
+  <img src="val_rust_side.png" alt=" Bend, ID side" width="45%"/>
+  <img src="val_rust_top.png" alt=" Bend, ID top" width="45%"/>
+</p>
+
 ### Version 0.4.1
 <p align="center">
   <img src="260110_1256_part12_10rects_10tabs.png" alt="260110_1256_part12_10rects_10tabs.png" width="45%"/>
