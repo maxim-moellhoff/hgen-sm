@@ -2,8 +2,8 @@ import numpy as np
 import itertools
 
 from config.design_rules import min_flange_length
-from src.hgen_sm.create_segments.geometry_helpers import calculate_plane, calculate_plane_intersection, create_bending_point, calculate_flange_points, next_cp
-from src.hgen_sm.create_segments.utils import line_plane_intersection, project_onto_line, are_planes_same
+from src.hgen_sm.create_segments.geometry_helpers import calculate_plane, calculate_plane_intersection, create_bending_point, calculate_flange_points, next_cp, are_planes_same
+from src.hgen_sm.create_segments.utils import line_plane_intersection, project_onto_line
 from src.hgen_sm.filters import min_flange_width_filter, tab_fully_contains_rectangle, lines_cross, are_corners_neighbours, minimum_angle_filter, thin_segment_filter
 from src.hgen_sm.data import Bend, Tab    
 
